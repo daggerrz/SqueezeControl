@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="Squeezecenter Server">
+            
+        <EditTextPreference
+                android:key="server_address"
+                android:title="Squeezecenter Address"
+                android:summary="IP or name of Sqeezecenter server (e.g 192.168.0.10)"
+                android:singleLine="true"
+                android:dialogTitle="IP address or name"
+                android:defaultValue="192.168.0.x"
+                />
+        <EditTextPreference
+                android:key="username"
+                android:title="Username (optional)"
+                android:summary="Username to login with if you have security configured"
+                android:singleLine="true"
+                android:dialogTitle="Username"
+                android:defaultValue=""
+                />
+        <EditTextPreference
+                android:key="password"
+                android:title="Password (optional)"
+                android:summary="Password to login with if you have security configured"
+                android:singleLine="true"
+                android:dialogTitle="Password"
+                android:defaultValue=""
+                android:password="true"
+                />
+		<Preference 
+			android:key="preferences_connect"
+			android:title="Connect and continue"
+			/>
+	</PreferenceCategory>
+	
+	<PreferenceCategory
+            android:title="Advanced Settings">
+        <EditTextPreference
+                android:key="cli_port"
+                android:title="CLI Port"
+                android:summary="Command Line Interface Port (usually 9090)"
+                android:dialogTitle="CLI Port" 
+                android:defaultValue="9090"
+                android:numeric="integer"
+                />
+
+        <EditTextPreference
+                android:key="http_port"
+                android:title="HTTP Port"
+                android:summary="HTTP Port (usually 9000)"
+                android:dialogTitle="HTTP Port" 
+                android:defaultValue="9000"
+                android:numeric="integer"
+                />
+            
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="Diagnostics">
+		<Preference 
+			android:key="test_cli"
+			android:title="Test CLI port"
+			/>
+		<Preference 
+			android:key="test_http"
+			android:title="Test HTTP port"
+			/>
+	</PreferenceCategory>                    
+
+</PreferenceScreen>

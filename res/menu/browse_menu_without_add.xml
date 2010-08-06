@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/browser_play"
+        android:orderInCategory="2"
+        android:title="Play now" />
+
+
+</menu>

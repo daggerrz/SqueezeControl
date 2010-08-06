@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme is the default theme. -->
+    <style name="Theme" parent="android:Theme">
+    </style>
+
+    <!-- Variation on our application theme that forces a plain
+        text style. -->
+    <style name="Heading">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:orientation">horizontal</item>
+       	<item name="android:layout_width">fill_parent</item>
+       	<item name="android:layout_height">wrap_content</item>
+       	<item name="android:padding">3pt</item>
+       	<item name="android:textColor">#000</item>
+       	<item name="android:background">#eee</item>
+    </style>
+
+</resources>

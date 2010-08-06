@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="3pt"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+	android:layout_width="fill_parent"
+    android:gravity="center_vertical"
+    >
+
+	<LinearLayout
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+
+		<TextView 
+			android:id="@+id/player_name"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1"
+		    android:text="Dag Øyvind Liodden"
+		    android:textColor="#fff"		    
+		/>
+	
+		<TextView 
+			android:id="@+id/player_model"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="right"
+		    android:text="900 55 383"
+		/>
+	</LinearLayout>
+	<TextView 
+		android:id="@+id/player_ip"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="Heimdalsgata 21, 0561 Oslo"
+	/>
+</LinearLayout>

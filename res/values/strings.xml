@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SqueezeControl</string>
+    <string name="loading_progress">Loading...</string>
+    <string name="browser_mode_activity">Browse SqueezeCenter music</string>
+    <string name="wlan_required">SqueezeControl requires a WLAN connection to work. Enable WLAN now?</string>
+</resources>

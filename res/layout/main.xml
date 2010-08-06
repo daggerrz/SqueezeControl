@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:id="@+id/Main" 
+    >
+
+	<LinearLayout 
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+		android:orientation="horizontal"
+		>
+		<ImageView 
+			android:id="@+id/CoverImage" 
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	        android:minWidth="180px"
+			android:src="@drawable/cover_96x96_p"
+			android:layout_weight="2"
+			android:scaleType="fitStart"/>
+
+		<LinearLayout 
+			android:id="@+id/LinearLayout01" 
+			android:layout_width="400dp" 
+			android:layout_height="wrap_content"
+			android:layout_weight="5"
+	        android:paddingLeft="3dp"
+			android:orientation="vertical"
+			>
+			<ImageButton
+				android:id="@+id/browse" 
+				android:text="Browse"
+				android:layout_width="fill_parent" 
+				android:layout_height="wrap_content"
+		        android:layout_marginBottom="6dp"
+		        android:src="@drawable/ic_menu_music_library"
+				/>
+			<ImageButton 
+				android:id="@+id/playlist" 
+				android:text="Now playing"
+				android:layout_width="fill_parent" 
+				android:layout_height="wrap_content"
+		        android:layout_marginBottom="6dp"
+		        android:src="@drawable/ic_mp_playlist_list"
+				/>
+			<LinearLayout 
+				android:layout_width="fill_parent" 
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				>
+			     <ImageButton 
+			     	android:id="@+id/DecVolumeButton"
+			     	style="@android:style/MediaButton.Next"
+					android:layout_weight="1" 
+					android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			        android:layout_marginBottom="6dp"
+			        android:src="@drawable/ic_volume_down"
+			     />
+			     <ImageButton 
+					android:id="@+id/IncVolumeButton" 
+					android:layout_weight="1" 
+					android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			        android:layout_marginBottom="6dp"
+			     	style="@android:style/MediaButton.Next"
+			        android:src="@drawable/ic_volume_up"
+			     />
+				
+				<!-- Button 
+					android:id="@+id/IncVolumeButton" 
+					android:layout_weight="1" 
+					android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			        android:layout_marginBottom="6dp"
+					android:text="+"/>
+				<Button android:id="@+id/DecVolumeButton"
+					android:layout_weight="1" 
+					android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			        android:layout_marginBottom="6dp"
+					android:text="-"/-->
+			</LinearLayout>				
+		</LinearLayout>
+	</LinearLayout>
+		<LinearLayout 
+			android:id="@+id/SongInfo" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			>
+	    <LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal"
+	        android:baselineAligned="false"
+	        android:paddingLeft="11dip"
+	        android:paddingTop="0dip"
+	        android:paddingBottom="8dip">
+	
+	        <ImageView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_marginRight="4dip"
+	            android:src="@drawable/ic_mp_song_playback" />
+	
+	        <TextView android:id="@+id/SongDescription"
+		    	android:textColor="#fff"
+		    	android:textSize="10pt" 
+		    	android:textStyle="italic"
+		    	android:singleLine="true"
+	            android:ellipsize="end"
+	            android:layout_gravity="center_vertical"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content" />
+	
+	    </LinearLayout>
+	    <LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal"
+	        android:baselineAligned="false"
+	        android:paddingLeft="11dip"
+	        android:paddingTop="4dip"
+	        android:paddingBottom="8dip">
+		
+		        <ImageView
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginRight="4dip"
+		            android:src="@drawable/ic_mp_album_playback" />
+		
+		        <TextView android:id="@+id/AlbumName"
+		            android:singleLine="true"
+		            android:ellipsize="end"
+			    	android:textSize="14sp" 
+		            android:layout_gravity="center_vertical"
+		            android:layout_width="fill_parent"
+		            android:layout_height="wrap_content" />
+	    </LinearLayout>
+	    <LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal"
+	        android:baselineAligned="false"
+	        android:paddingLeft="11dip"
+	        android:paddingTop="4dip"
+	        android:paddingBottom="8dip">
+		
+		        <ImageView
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginRight="4dip"
+		            android:src="@drawable/ic_mp_artist_playback" />
+		
+		        <TextView android:id="@+id/ArtistName"
+		            android:textSize="14sp"
+		            android:singleLine="true"
+		            android:ellipsize="end"
+		            android:layout_gravity="center_vertical"
+		            android:layout_width="fill_parent"
+		            android:layout_height="wrap_content" />
+	    </LinearLayout>
+	</LinearLayout>
+	
+	<com.squeezecontrol.view.PlayerControlsView
+		android:id="@+id/PlayerControls"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent" 
+		android:gravity="center"
+		/>		
+</LinearLayout>

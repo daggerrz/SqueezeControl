@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="6dip"
+    >
+	<ImageView
+		android:id="@+id/album_image"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="0"
+	    android:textColor="#fff"
+	    android:src="@drawable/ic_mp_song_playback"
+	    android:layout_marginRight="5pt"		    
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+	/>
+
+
+	<TextView 
+		android:id="@+id/name"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1"
+	    android:text="10 000 days"
+		android:singleLine="true"
+	    android:textColor="#fff"
+		android:textAppearance="?android:attr/textAppearanceLarge"
+		android:linksClickable="false"
+		android:textColorLink="#eee"
+       	android:layout_toRightOf="@id/album_image"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+	/>
+	<TextView 
+		android:id="@+id/album_name"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="Tool"
+		android:singleLine="true"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+       	android:layout_toRightOf="@id/album_image"
+		android:layout_below="@id/name"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+	/>
+	<TextView 
+		android:id="@+id/artist_name"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="Tool"
+		android:singleLine="true"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+       	android:layout_toRightOf="@id/album_image"
+		android:layout_below="@id/album_name"
+	/>
+</RelativeLayout>

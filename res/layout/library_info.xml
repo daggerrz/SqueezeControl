@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+	<TextView 
+		android:orientation="horizontal" 
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" 
+		android:padding="3pt"
+	    android:textAppearance="?android:attr/textAppearanceLarge"
+		android:text="Library information"
+	/>
+	
+	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	   android:layout_width="fill_parent"
+	   android:layout_height="fill_parent"
+	   android:stretchColumns="1">
+	
+	   <TableRow>
+	       <TextView
+	           android:text="Artists"
+	           android:textStyle="bold"
+	           android:gravity="right"
+	           android:padding="3dip" />
+	
+	       <TextView android:id="@+id/artist_count"
+	           android:text="-"
+	           android:padding="3dip"
+	           />
+	   </TableRow>
+	   <TableRow>
+	       <TextView
+	           android:text="Albums"
+	           android:textStyle="bold"
+	           android:gravity="right"
+	           android:padding="3dip" />
+	
+	       <TextView android:id="@+id/album_count"
+	           android:text="-"
+	           android:padding="3dip"
+	           />
+	   </TableRow>
+	   <TableRow>
+	       <TextView
+	           android:text="Songs"
+	           android:textStyle="bold"
+	           android:gravity="right"
+	           android:padding="3dip" />
+	
+	       <TextView android:id="@+id/song_count"
+	           android:text="-"
+	           android:padding="3dip"
+	           />
+	   </TableRow>
+	   <TableRow android:paddingTop="10pt">
+	   		<Button
+				android:id="@+id/rescan_library"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:text="Rescan library"
+			/>
+	   	</TableRow>
+	</TableLayout>
+</LinearLayout>

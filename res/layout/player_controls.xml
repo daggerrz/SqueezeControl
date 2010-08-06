@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:orientation="horizontal"
+     android:layout_marginTop="1px"
+     android:layout_marginBottom="2px"
+     android:gravity="center">
+     
+     <TextView android:id="@+id/CurrentTime" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+     <com.squeezecontrol.view.RepeatingImageButton android:id="@+id/PreviousButton" style="@android:style/MediaButton.Previous" />
+
+     <ImageButton android:id="@+id/PauseButton" style="@android:style/MediaButton.Play" />
+
+     <com.squeezecontrol.view.RepeatingImageButton android:id="@+id/NextButton" style="@android:style/MediaButton.Next" />
+
+ </LinearLayout>
