@@ -27,12 +27,12 @@ public class BrowseModeActivity extends ListActivity {
 		modes.add(new Action("Albums", R.drawable.albums));
 		modes.add(new Action("Songs", R.drawable.songs));
 		modes.add(new Action("Music folder", R.drawable.musicfolder));
+		modes.add(new Action("Internet radio", R.drawable.radio));
+		modes.add(new Action("Apps", R.drawable.plugin));
 		modes.add(new Action("Genres", R.drawable.genres));
 		modes.add(new Action("New music", R.drawable.newmusic));
 		modes.add(new Action("Playlists", R.drawable.playlists));
 		modes.add(new Action("Favorites", R.drawable.favorites));
-		modes.add(new Action("Internet radio", R.drawable.radio));
-		modes.add(new Action("Apps", R.drawable.plugin));
 
 		setListAdapter(new ArrayAdapter<Action>(this,
 				R.layout.list_item_with_icon, modes){
@@ -77,25 +77,27 @@ public class BrowseModeActivity extends ListActivity {
 			intent = new Intent(this, MusicFolderBrowserActivity.class);
 			break;
 		case 4:
-			intent = new Intent(this, GenreBrowserActivity.class);
+			intent = new Intent(this, AppsAndRadioRootsBrowserActivity.class);
+			intent.putExtra(AppsAndRadioRootsBrowserActivity.EXTRA_BROWSER_TYPE, AppsAndRadioRootsBrowserActivity.RADIOS);
 			break;
 		case 5:
+			intent = new Intent(this, AppsAndRadioRootsBrowserActivity.class);
+			intent.putExtra(AppsAndRadioRootsBrowserActivity.EXTRA_BROWSER_TYPE, AppsAndRadioRootsBrowserActivity.APPS);
+			break;
+		case 6:
+			intent = new Intent(this, GenreBrowserActivity.class);
+			break;
+		case 7:
 			intent = new Intent(this, AlbumBrowserActivity.class);
 			intent.putExtra(AlbumBrowserActivity.EXTRA_SORT_MODE, AlbumBrowserActivity.SORT_MODE_NEW_MUSIC);
 			break;
-		case 6:
+		case 8:
 			intent = new Intent(this, PlaylistBrowserActivity.class);
 			break;
-		case 7:
-			intent = new Intent(this, FavoriteBrowserActivity.class);
-			break;
-		case 8:
-			intent = new Intent(this, RadioBrowserActivity.class);
-			intent.putExtra(RadioBrowserActivity.EXTRA_BROWSER_TYPE, RadioBrowserActivity.RADIOS);
-			break;
 		case 9:
-			intent = new Intent(this, RadioBrowserActivity.class);
-			intent.putExtra(RadioBrowserActivity.EXTRA_BROWSER_TYPE, RadioBrowserActivity.APPS);
+			intent = new Intent(this, XmlBrowserActivity.class);
+			intent.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND, "favorites");
+			intent.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, "Favorites");
 			break;
 		}
 		if (intent != null)

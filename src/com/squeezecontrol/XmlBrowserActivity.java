@@ -30,10 +30,13 @@ public class XmlBrowserActivity extends
 	public static final String EXTRA_BROWSER_COMMAND_COMMAND = "browser_command";
 	public static final String EXTRA_ITEM_ID = "browser_item_id";
 	public static final String EXTRA_BROWSER_TITLE = "browser_title";
+	public static final String EXTRA_SEARCH_PARAM = "browser_search";
+
 	private String mBrowserCommand;
 	private String mItemId;
 	private Callback<Bitmap> mImageCallback;
 	private ImageLoaderService mImageLoaderService;
+	private String mSearchParam;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,8 +47,10 @@ public class XmlBrowserActivity extends
 		mBrowserCommand = getIntent().getStringExtra(
 				EXTRA_BROWSER_COMMAND_COMMAND);
 		mItemId = getIntent().getStringExtra(EXTRA_ITEM_ID);
+		mSearchParam = getIntent().getStringExtra(EXTRA_SEARCH_PARAM);
 		String title = getIntent().getStringExtra(EXTRA_BROWSER_TITLE);
-		if (title != null) mTitle = title;
+		if (title != null)
+			mTitle = title;
 
 		final Runnable notifyChanges = new Runnable() {
 			public void run() {
@@ -78,6 +83,7 @@ public class XmlBrowserActivity extends
 
 				ImageView icon = (ImageView) view.findViewById(R.id.icon);
 				TextView name = (TextView) view.findViewById(R.id.name);
+				icon.setVisibility(View.VISIBLE);
 				if (a == null) {
 					name.setText(R.string.loading_progress);
 					icon.setImageResource(R.drawable.unknown_album_cover);
@@ -85,9 +91,11 @@ public class XmlBrowserActivity extends
 					if (a.icon == null) {
 						if (a.hasItems)
 							icon.setImageResource(R.drawable.musicfolder);
-						else if (a.isAudio)
+						else if ("link".equals(a.type))
 							icon.setImageResource(R.drawable.tuneinurl);
-						else 
+						else if ("text".equals(a.type))
+							icon.setVisibility(View.GONE);
+						else
 							icon.setImageResource(R.drawable.unknown_album_cover);
 					} else {
 						Bitmap image = mImageLoaderService.getFromCache(a.icon);
@@ -95,8 +103,8 @@ public class XmlBrowserActivity extends
 							icon.setImageBitmap(image);
 						} else {
 							icon.setImageResource(R.drawable.unknown_album_cover);
-							mImageLoaderService
-									.loadImage(a.icon, mImageCallback);
+							mImageLoaderService.loadImage(a.icon,
+									mImageCallback);
 
 						}
 					}
@@ -109,12 +117,21 @@ public class XmlBrowserActivity extends
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		XmlBrowserEntry item = (XmlBrowserEntry) l.getItemAtPosition(position);
-		if (item.hasItems) {
+		openItem(item, null);
+	}
+
+	private void openItem(XmlBrowserEntry item, String param) {
+		if ("search".equals(item.type) && param == null) {
+			openItem(item, "oasis");
+		} else if (item.hasItems) {
+
 			Intent i = new Intent(this, XmlBrowserActivity.class);
 			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND,
 					mBrowserCommand);
-			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.title == null ? item.name : item.title);
+			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE,
+					item.title == null ? item.name : item.title);
 			i.putExtra(XmlBrowserActivity.EXTRA_ITEM_ID, item.id);
+			i.putExtra(XmlBrowserActivity.EXTRA_SEARCH_PARAM, param);
 			startActivity(i);
 		} else {
 			getPlayer().sendCommand(
@@ -122,8 +139,9 @@ public class XmlBrowserActivity extends
 							+ " playlist play").addTag("item_id", item.id)
 							.toString());
 		}
+
 	}
-	
+
 	@Override
 	protected CharSequence getTitle(int totalCount) {
 		return mTitle;
@@ -156,6 +174,8 @@ public class XmlBrowserActivity extends
 					mBrowserCommand + " items " + startIndex + " " + pageSize);
 			if (mItemId != null)
 				command.addTag("item_id", mItemId);
+			if (mSearchParam != null)
+				command.addTag("search", mSearchParam);
 			SqueezeCommand res = getPlayer().sendRequest(command.toString());
 
 			XmlBrowserEntry entry = null;
@@ -170,7 +190,7 @@ public class XmlBrowserActivity extends
 				entry.isAudio = "1".equals(m.get("isaudio"));
 				entry.url = m.get("url");
 				entry.icon = m.get("image");
-				
+
 				entries.add(entry);
 
 				if (m.containsKey("count"))

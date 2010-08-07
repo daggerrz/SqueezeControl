@@ -40,7 +40,7 @@ public class GenreBrowserActivity extends AbstractMusicBrowserActivity<Genre> {
 	@Override
 	protected void addToPlaylist(Genre selectedItem) {
 		getSqueezeService().getPlayer().sendCommand(
-				"playlist addtracks contributor.id=" + selectedItem.getId());
+				"playlist addtracks genre.id=" + selectedItem.getId());
 		Toast.makeText(this, "Added to playlist:\n" + selectedItem.getName(),
 				Toast.LENGTH_SHORT).show();	
 	}
@@ -48,7 +48,7 @@ public class GenreBrowserActivity extends AbstractMusicBrowserActivity<Genre> {
 	@Override
 	protected void play(Genre selectedItem, int index) {
 		getSqueezeService().getPlayer().sendCommand(
-				"playlist loadtracks contributor.id=" + selectedItem.getId());
+				"playlist loadtracks genre.id=" + selectedItem.getId());
 	}
 	
 	@Override
