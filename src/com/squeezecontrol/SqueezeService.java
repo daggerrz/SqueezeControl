@@ -18,7 +18,7 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.squeezecontrol.download.MusicDownloadService;
-import com.squeezecontrol.image.AlbumArtService;
+import com.squeezecontrol.image.ImageLoaderService;
 import com.squeezecontrol.image.HttpFetchingImageStore;
 import com.squeezecontrol.io.SqueezeBroker;
 import com.squeezecontrol.io.SqueezeEventListener;
@@ -35,8 +35,13 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 
 	private ConnectivityManager mConnectivityManager;
 	private BroadcastReceiver mConnectivityStateReceiver;
-	private HttpFetchingImageStore mImageStore;
-	private AlbumArtService mCoverImageService;
+	
+	private HttpFetchingImageStore mCoverImageStore;
+	private ImageLoaderService mCoverImageService;
+	
+	private HttpFetchingImageStore mGenericImageStore;
+	private ImageLoaderService mGenericImageService;
+
 	private MusicDownloadService mDownloadService;
 
 	@Override
@@ -56,9 +61,6 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 		String password = Settings.getPassword(this);
 		mBroker = new SqueezeBroker(Settings.getHost(this), Settings
 				.getCLIPort(this), username, password, this);
-		mImageStore = new HttpFetchingImageStore("http://" + mBroker.getHost()
-				+ ":" + Settings.getHTTPPort(this) + "/music/", username,
-				password);
 
 		final MusicDownloadNotificationManager notManager = new MusicDownloadNotificationManager(
 				this);
@@ -106,7 +108,15 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 		};
 		mDownloadService.start();
 
-		mCoverImageService = new AlbumArtService(mImageStore);
+		mCoverImageStore = new HttpFetchingImageStore("http://" + mBroker.getHost()
+				+ ":" + Settings.getHTTPPort(this) + "/music/", username,
+				password);
+		mCoverImageService = new ImageLoaderService(mCoverImageStore);
+		
+		// For XMLBrowser
+		mGenericImageStore = new HttpFetchingImageStore(null, null, null);
+		mGenericImageService = new ImageLoaderService(mGenericImageStore);
+		
 
 		mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		mConnectivityStateReceiver = new BroadcastReceiver() {
@@ -210,10 +220,14 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 		return mBroker;
 	}
 
-	public AlbumArtService getCoverImageService() {
+	public ImageLoaderService getCoverImageService() {
 		return mCoverImageService;
 	}
 
+	public ImageLoaderService getGenericImageService() {
+		return mGenericImageService;
+	}
+	
 	public MusicDownloadService getDownloadService() {
 		return mDownloadService;
 	}

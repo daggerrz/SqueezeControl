@@ -23,6 +23,10 @@ import com.squeezecontrol.model.Song;
 
 public class SqueezePlayer {
 
+	public enum ShuffleMode {
+		NONE, BY_SONG, BY_ALBUM
+	}
+
 	private SqueezeBroker mBroker;
 	private String mId;
 	private String mEscapedId;
@@ -36,6 +40,7 @@ public class SqueezePlayer {
 	private Song mCurrentSong;
 	private Long mCurrentTimeInMillis;
 	private Integer mCurrentPlaylistIndex = null;
+	private ShuffleMode mShuffleMode;
 	private HashSet<SqueezePlayerListener> mListeners = new HashSet<SqueezePlayerListener>();
 
 	private ResponseCallback<Song> mCurrentSongCallback;
@@ -78,54 +83,68 @@ public class SqueezePlayer {
 	public void handleNotification(SqueezeCommand command) {
 		String c = command.getCommand();
 		try {
-		if ("time".equals(c)) {
-			mCurrentTimeInMillis = SqueezeCommand.parseTime(command.getFirstParameter());
-			if (mCurrentTimeInMillis != null) {
-				for (SqueezePlayerListener l : mListeners)
-					l.onPlayerStateChanged();
-			}
-		} else if ("playlist".equals(c)) {
+			if ("time".equals(c)) {
+				mCurrentTimeInMillis = SqueezeCommand.parseTime(command
+						.getFirstParameter());
+				if (mCurrentTimeInMillis != null) {
+					for (SqueezePlayerListener l : mListeners)
+						l.onPlayerStateChanged();
+				}
+			} else if ("playlist".equals(c)) {
 
-			String firstParam = command.getFirstParameter();
+				String firstParam = command.getFirstParameter();
 
-			if ("index".equals(firstParam)) {
-				int indexInPlayList = Integer.valueOf(command
-						.getLastParameter());
-				updateSongIndexInPlayList(indexInPlayList);
-				getSongInPlayList(mCurrentPlaylistIndex, mCurrentSongCallback);
-
-			} else if ("newsong".equals(firstParam)) {
-
-				// Song?
-				if (command.getParameters().length == 3) {
+				if ("index".equals(firstParam)) {
 					int indexInPlayList = Integer.valueOf(command
 							.getLastParameter());
 					updateSongIndexInPlayList(indexInPlayList);
 					getSongInPlayList(mCurrentPlaylistIndex,
 							mCurrentSongCallback);
-				} else {
-					// Radio
-					updateSongIndexInPlayList(-1);
-					Song radio = Song.forName(command.getLastParameter());
-					mCurrentSongCallback.handleResponse(radio);
+
+				} else if ("newsong".equals(firstParam)) {
+
+					// Song?
+					if (command.getParameters().length == 3) {
+						int indexInPlayList = Integer.valueOf(command
+								.getLastParameter());
+						updateSongIndexInPlayList(indexInPlayList);
+						getSongInPlayList(mCurrentPlaylistIndex,
+								mCurrentSongCallback);
+					} else {
+						// Radio
+						updateSongIndexInPlayList(-1);
+						Song radio = Song.forName(command.getLastParameter());
+						mCurrentSongCallback.handleResponse(radio);
+					}
+				} else if ("shuffle".equals(firstParam)) {
+					// Response for "playlist shuffle ?"
+					int mode = Integer.parseInt(command.getLastParameter());
+					switch (mode) {
+					case 0:
+						mShuffleMode = ShuffleMode.NONE;
+						break;
+					case 1:
+						mShuffleMode = ShuffleMode.BY_SONG;
+						break;
+					case 2:
+						mShuffleMode = ShuffleMode.BY_ALBUM;
+						break;
+					}
+					notifyPlayerStateChange();
 				}
+			} else if ("pause".equals(c)) {
+				// Paused / unpaused
+				mPaused = "1".equals(command.getFirstParameter());
+				notifyPlayerStateChange();
+			} else if ("mode".equals(c)) {
+				// Response for "mode ?"
+				mPaused = !"play".equals(command.getFirstParameter());
+				notifyPlayerStateChange();
+			} else if ("power".equals(c)) {
+				// Response for "power ?"
+				mPoweredOn = "1".equals(command.getFirstParameter());
+				notifyPlayerStateChange();
 			}
-		} else if ("pause".equals(c)) {
-			// Paused / unpaused
-			mPaused = "1".equals(command.getFirstParameter());
-			for (SqueezePlayerListener l : mListeners)
-				l.onPlayerStateChanged();
-		} else if ("mode".equals(c)) {
-			// Response for "mode ?"
-			mPaused = !"play".equals(command.getFirstParameter());
-			for (SqueezePlayerListener l : mListeners)
-				l.onPlayerStateChanged();
-		} else if ("power".equals(c)) {
-			// Response for "power ?"
-			mPoweredOn  = "1".equals(command.getFirstParameter());
-			for (SqueezePlayerListener l : mListeners)
-				l.onPlayerStateChanged();
-		}
 		} catch (NumberFormatException e) {
 			Log.e("SqueezePlayer", e.getMessage());
 		}
@@ -136,6 +155,12 @@ public class SqueezePlayer {
 		sendCommand("playlist index ?");
 		sendCommand("power ?");
 		sendCommand("mode ?");
+		sendCommand("playlist shuffle ?");
+	}
+
+	private void notifyPlayerStateChange() {
+		for (SqueezePlayerListener l : mListeners)
+			l.onPlayerStateChanged();
 	}
 
 	public int getSongIndexInPlaylist() {
@@ -223,7 +248,7 @@ public class SqueezePlayer {
 	public Song getCurrentSong() {
 		return mCurrentSong;
 	}
-	
+
 	public Long getCurrentTimeInMillis() {
 		return mCurrentTimeInMillis;
 	}
@@ -237,31 +262,34 @@ public class SqueezePlayer {
 		sendCommand("play");
 		mPaused = !mPaused;
 	}
-	
+
 	public void togglePower() {
-		if (mPoweredOn) powerOff();
-		else powerOn();
+		if (mPoweredOn)
+			powerOff();
+		else
+			powerOn();
 	}
-	
+
 	public void powerOff() {
 		sendCommand("power 0");
 	}
-	
+
 	public void powerOn() {
 		sendCommand("power 1");
 	}
-	
+
 	public boolean isPowerOn() {
 		return mPoweredOn;
 	}
 
 	public void skip(int seconds) {
-		if (seconds == 0) return;
-		sendCommand("time " + (seconds > 0 ? "+" : "")  + String.valueOf(seconds));
+		if (seconds == 0)
+			return;
+		sendCommand("time " + (seconds > 0 ? "+" : "")
+				+ String.valueOf(seconds));
 		sendCommand("time ?");
 	}
 
-	
 	public void nextSong() {
 		sendCommand("button jump_fwd");
 	}
@@ -331,6 +359,14 @@ public class SqueezePlayer {
 		sendCommand("playlist index " + position);
 	}
 
+	public ShuffleMode getShuffleMode() {
+		return mShuffleMode;
+	}
+	
+	public void setShuffleMode(ShuffleMode mode) {
+		sendCommand("playlist shuffle " + mode.ordinal());
+	}
+
 	public void addToPlaylist(Song song) {
 		sendCommand("playlist addtracks track.id=" + song.getId());
 	}
@@ -366,6 +402,5 @@ public class SqueezePlayer {
 			mCurrentPlaylistIndex--;
 		sendCommand("playlist delete " + index);
 	}
-
 
 }

@@ -79,7 +79,7 @@ public class BrowseableAdapter<T extends Browsable> extends BaseAdapter
 	}
 
 	public void setCount(int count) {
-		if (mCount != count) {
+		if (mObjects == null || (mCount != count)) {
 			mCount = count;
 			mObjects = new Object[count];
 			if (mNotifyOnChange)

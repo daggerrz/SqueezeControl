@@ -23,13 +23,15 @@ public class BrowseModeActivity extends ListActivity {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		ArrayList<Action> modes = new ArrayList<Action>();
-		modes.add(new Action("Artists", R.drawable.artists_48x48_f));
-		modes.add(new Action("Albums", R.drawable.albums_48x48_f));
-		modes.add(new Action("Songs", R.drawable.songs_48x48_f));
-		modes.add(new Action("Genres", R.drawable.genres_48x48_f));
-		modes.add(new Action("New music", R.drawable.newmusic_48x48_f));
-		modes.add(new Action("Playlists", R.drawable.playlists_48x48_f));
-		modes.add(new Action("Favorites", R.drawable.favorites_48x48_f));
+		modes.add(new Action("Artists", R.drawable.artists));
+		modes.add(new Action("Albums", R.drawable.albums));
+		modes.add(new Action("Songs", R.drawable.songs));
+		modes.add(new Action("Music folder", R.drawable.musicfolder));
+		modes.add(new Action("Genres", R.drawable.genres));
+		modes.add(new Action("New music", R.drawable.newmusic));
+		modes.add(new Action("Playlists", R.drawable.playlists));
+		modes.add(new Action("Favorites", R.drawable.favorites));
+		modes.add(new Action("Internet radio", R.drawable.favorites));
 
 		setListAdapter(new ArrayAdapter<Action>(this,
 				R.layout.list_item_with_icon, modes){
@@ -71,17 +73,23 @@ public class BrowseModeActivity extends ListActivity {
 			intent = new Intent(this, SongBrowserActivity.class);
 			break;
 		case 3:
-			intent = new Intent(this, GenreBrowserActivity.class);
+			intent = new Intent(this, MusicFolderBrowserActivity.class);
 			break;
 		case 4:
+			intent = new Intent(this, GenreBrowserActivity.class);
+			break;
+		case 5:
 			intent = new Intent(this, AlbumBrowserActivity.class);
 			intent.putExtra(AlbumBrowserActivity.EXTRA_SORT_MODE, AlbumBrowserActivity.SORT_MODE_NEW_MUSIC);
 			break;
-		case 5:
+		case 6:
 			intent = new Intent(this, PlaylistBrowserActivity.class);
 			break;
-		case 6:
+		case 7:
 			intent = new Intent(this, FavoriteBrowserActivity.class);
+			break;
+		case 8:
+			intent = new Intent(this, RadioBrowserActivity.class);
 			break;
 		}
 		if (intent != null)

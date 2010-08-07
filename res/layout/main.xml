@@ -44,7 +44,7 @@
 				android:layout_width="fill_parent" 
 				android:layout_height="wrap_content"
 		        android:layout_marginBottom="6dp"
-		        android:src="@drawable/ic_mp_playlist_list"
+		        android:src="@drawable/ic_mp_current_playlist_btn"
 				/>
 			<LinearLayout 
 				android:layout_width="fill_parent" 
@@ -67,18 +67,6 @@
 			     	style="@android:style/MediaButton.Next"
 			        android:src="@drawable/ic_volume_up"
 			     />
-				
-				<!-- Button 
-					android:id="@+id/IncVolumeButton" 
-					android:layout_weight="1" 
-					android:layout_width="fill_parent" android:layout_height="wrap_content" 
-			        android:layout_marginBottom="6dp"
-					android:text="+"/>
-				<Button android:id="@+id/DecVolumeButton"
-					android:layout_weight="1" 
-					android:layout_width="fill_parent" android:layout_height="wrap_content" 
-			        android:layout_marginBottom="6dp"
-					android:text="-"/-->
 			</LinearLayout>				
 		</LinearLayout>
 	</LinearLayout>
@@ -87,6 +75,7 @@
 			android:layout_width="fill_parent" 
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
+			android:paddingTop="20dip"
 			>
 	    <LinearLayout
 	        android:layout_width="fill_parent"

@@ -19,7 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AbsListView.OnScrollListener;
 
-import com.squeezecontrol.image.AlbumArtService;
+import com.squeezecontrol.image.ImageLoaderService;
 import com.squeezecontrol.model.Album;
 import com.squeezecontrol.view.BrowseableAdapter;
 
@@ -35,7 +35,7 @@ public class AlbumBrowserActivity extends AbstractMusicBrowserActivity<Album>
 	private String mArtistId;
 	private String mSortMode = SORT_MODE_ALBUM;
 	private Callback<Bitmap> mImageCallback;
-	private AlbumArtService mCoverImageService;
+	private ImageLoaderService mCoverImageService;
 	private boolean mLoadArt = true;
 
 	@Override

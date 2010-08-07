@@ -11,10 +11,11 @@
 	    android:layout_height="wrap_content"
 	    android:layout_weight="0"
 	    android:textColor="#fff"
+	    android:src="@drawable/artists"
 	    android:layout_marginRight="5pt"		    
-		android:scaleType="center"
-	    android:minWidth="50px"
-	    android:minHeight="50px"
+		android:scaleType="matrix"
+	    android:minHeight="50dip"
+	    android:maxHeight="50dip"
 	/>
 
 	<TextView 
@@ -22,7 +23,7 @@
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_weight="1"
-	    android:text="Ring til"
+	    android:text="Text here"
 	    android:textColor="#fff"
 		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:linksClickable="false"

@@ -23,8 +23,8 @@ public class Song implements Browsable {
 	public String type; // Content type / extension
 	public boolean remote = false;
 
-	public Song(String path) {
-		this.path = path;
+	public Song(String id) {
+		this.id = id;;
 	}
 
 	public Song() {
@@ -49,7 +49,7 @@ public class Song implements Browsable {
 
 
 	public static Song forName(String name) {
-		Song s = new Song(null);
+		Song s = new Song();
 		s.title = name;
 		return s;
 	}

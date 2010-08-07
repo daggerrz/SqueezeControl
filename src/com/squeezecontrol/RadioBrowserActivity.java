@@ -13,7 +13,8 @@ import com.squeezecontrol.model.Artist;
 import com.squeezecontrol.model.RadioStation;
 import com.squeezecontrol.view.BrowseableAdapter;
 
-public class RadioBrowserActivity extends AbstractMusicBrowserActivity<RadioStation> {
+public class RadioBrowserActivity extends
+		AbstractMusicBrowserActivity<RadioStation> {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -22,27 +23,32 @@ public class RadioBrowserActivity extends AbstractMusicBrowserActivity<RadioStat
 		setContentView(R.layout.artist_list);
 		super.init();
 	}
-	
+
 	@Override
 	protected BrowseableAdapter<RadioStation> createListAdapter() {
-		return new BrowseableAdapter<RadioStation>(this, android.R.layout.simple_list_item_1);
+		return new BrowseableAdapter<RadioStation>(this,
+				android.R.layout.simple_list_item_1);
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (position < 0)
-			return;
+		RadioStation item = getSelectedItem();
+		if ("xmlbrowser".equals(item.type)) {
+			Intent i = new Intent(this, XmlBrowserActivity.class);
+			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND, item.id);
+			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.title);
+			startActivity(i);
+		}
 	}
-	
+
 	@Override
 	protected void addToPlaylist(RadioStation selectedItem) {
 	}
-	
+
 	@Override
 	protected void play(RadioStation selectedItem, int index) {
 	}
 
-	
 	@Override
 	protected BrowseLoadResult<RadioStation> loadItems(int startIndex, int count)
 			throws IOException {

@@ -31,9 +31,9 @@ public class HttpFetchingImageStore implements ImageStore {
 	}
 
 	@Override
-	public Bitmap getImage(String name) {
+	public Bitmap getImage(String url) {
 		try {
-			HttpGet get = new HttpGet(baseUrl + name);
+			HttpGet get = new HttpGet(baseUrl == null ? url : baseUrl + url);
 			HttpResponse response = (BasicHttpResponse) mClient.execute(get);
 			return BitmapFactory
 					.decodeStream(response.getEntity().getContent());

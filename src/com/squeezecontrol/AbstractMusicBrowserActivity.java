@@ -161,6 +161,10 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 	protected void onServiceBound(SqueezeService service) {
 	}
 
+	protected void onInitialResultLoaded(BrowseLoadResult<T> result) {
+
+	}
+
 	protected String getQueryString() {
 		return mQueryString;
 	}
@@ -206,8 +210,7 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 		if (status.equals(Environment.MEDIA_MOUNTED)) {
 			AlertDialog.Builder b = new AlertDialog.Builder(this);
 			b.setTitle("Download to device?");
-			b
-					.setMessage("Are you sure you want to download this to your device?");
+			b.setMessage("Are you sure you want to download this to your device?");
 			b.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -219,8 +222,7 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 		} else {
 			AlertDialog.Builder b = new AlertDialog.Builder(this);
 			b.setTitle("No SD-card");
-			b
-					.setMessage("SD-card / external storage is not available. Please check that your device has an SD-card and that it is not mounted, then try again!");
+			b.setMessage("SD-card / external storage is not available. Please check that your device has an SD-card and that it is not mounted, then try again!");
 			b.setPositiveButton("OK", null);
 			b.create().show();
 		}
@@ -300,17 +302,16 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 					return;
 				}
 
-				BrowseableAdapter ad = (BrowseableAdapter) getListAdapter();
+				BrowseableAdapter<T> ad = (BrowseableAdapter<T>) getListAdapter();
 				int totalCount = result.getTotalCount();
-				if (totalCount != ad.getCount()) {
-					ad.setNotifyOnChange(false);
-					ad.setCount(totalCount);
-				}
+				ad.setNotifyOnChange(false);
+				ad.setCount(totalCount);
 				ad.setNotifyOnChange(true);
 				ad.set(result.getResults(), result.getStartIndex());
 				AbstractMusicBrowserActivity.this.setTitle("Showing "
 						+ totalCount + " " + mTitle
 						+ (totalCount == 1 ? "" : "s"));
+				onInitialResultLoaded(result);
 			};
 		});
 	}

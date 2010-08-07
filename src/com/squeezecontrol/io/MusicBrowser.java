@@ -2,6 +2,7 @@ package com.squeezecontrol.io;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import android.net.Uri;
@@ -11,6 +12,7 @@ import com.squeezecontrol.BrowseLoadResult;
 import com.squeezecontrol.model.Album;
 import com.squeezecontrol.model.Artist;
 import com.squeezecontrol.model.Favorite;
+import com.squeezecontrol.model.FolderItem;
 import com.squeezecontrol.model.Genre;
 import com.squeezecontrol.model.Playlist;
 import com.squeezecontrol.model.RadioStation;
@@ -101,8 +103,9 @@ public class MusicBrowser {
 			if (albumId != null)
 				command.addTag("sort", "tracknum");
 			command.addTag("artist_id", artistId);
-			
-			// a:artistname, l:album name, r:bitrate, d:duration, o:type, x:remote
+
+			// a:artistname, l:album name, r:bitrate, d:duration, o:type,
+			// x:remote
 			command.addTag("tags", "alrdox");
 			SqueezeCommand res = mBroker.sendRequest(command.toString());
 			Song song = null;
@@ -253,6 +256,41 @@ public class MusicBrowser {
 		return new BrowseLoadResult<Playlist>(count, startIndex, lists);
 	}
 
+	public BrowseLoadResult<FolderItem> getFolderContents(String queryString,
+			String folderId, int startIndex, int pageSize) {
+		ArrayList<FolderItem> items = new ArrayList<FolderItem>();
+		int count = 0;
+		try {
+			SqueezeTaggedRequestBuilder command = new SqueezeTaggedRequestBuilder(
+					"musicfolder " + startIndex + " " + pageSize);
+
+			if (folderId != null)
+				command.addTag("folder_id", folderId);
+
+			if (queryString != null && !"".equals(queryString))
+				command.addTag("search", Uri.encode(queryString));
+
+			SqueezeCommand res = mBroker.sendRequest(command.toString());
+			FolderItem item = new FolderItem();
+			for (String p : res.getParameters()) {
+				if (p.startsWith("filename%3A")) {
+					item.name = SqueezeCommand.decode(p.substring("filename%3A"
+							.length()));
+				} else if (p.startsWith("id%3A")) {
+					item = new FolderItem();
+					items.add(item);
+					item.id = p.substring("id%3A".length());
+				} else if (p.startsWith("type%3A")) {
+					item.type = p.substring("type%3A".length());
+				} else if (p.startsWith("count%3A")) {
+					count = Integer.parseInt(p.substring("count%3A".length()));
+				}
+			}
+		} catch (IOException e) {
+		}
+		return new BrowseLoadResult<FolderItem>(count, startIndex, items);
+	}
+
 	public BrowseLoadResult<RadioStation> getRadios(String searchString,
 			int startIndex, int pageSize) {
 		ArrayList<RadioStation> radios = new ArrayList<RadioStation>(pageSize);
@@ -262,23 +300,30 @@ public class MusicBrowser {
 					"radios " + startIndex + " " + pageSize);
 			if (searchString != null && !"".equals(searchString))
 				command.addTag("search", Uri.encode(searchString));
-			command.addTag("tags", "alj");
 			SqueezeCommand res = mBroker.sendRequest(command.toString());
+
+			// Count comes first here
+			for (String c : res.getParameters()) {
+				if (c.startsWith("count%3A")) {
+					count = Integer.parseInt(c.substring("count%3A".length()));
+					break;
+				}
+			}
+			
 			RadioStation radio = null;
-			for (ArrayList<String> radioRow : res.splitParameters("id")) {
-				Map<String, String> albumMap = SqueezeCommand
-						.splitToParameterMap(radioRow);
+			List<Map<String, String>> maps = res.splitToMap("icon");
+			for (Map<String, String> m : maps) {
+				radio = new RadioStation();
+				radio.title = m.get("title");
+				radio.icon = m.get("icon");
+				radio.name = m.get("name");
+				radio.id = m.get("cmd");
+				radio.type = m.get("type");
+				radios.add(radio);
 			}
 		} catch (IOException e) {
 		}
 		return new BrowseLoadResult<RadioStation>(count, startIndex, radios);
-	}
-
-	public int getFavoritesCount(String searchString) {
-		String command = "favorites items 0 0";
-		if (searchString != null && !"".equals(searchString))
-			command += " search%3A" + Uri.encode(searchString);
-		return count(command);
 	}
 
 	public BrowseLoadResult<Favorite> getFavorites(String searchString,

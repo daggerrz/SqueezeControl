@@ -16,12 +16,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageButton;
@@ -33,6 +33,7 @@ import com.squeezecontrol.io.SqueezeBroker;
 import com.squeezecontrol.io.SqueezeEventListener;
 import com.squeezecontrol.io.SqueezePlayer;
 import com.squeezecontrol.io.SqueezePlayerListener;
+import com.squeezecontrol.io.SqueezePlayer.ShuffleMode;
 import com.squeezecontrol.model.Song;
 import com.squeezecontrol.view.PlayerControlsView;
 
@@ -48,6 +49,7 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 	private static final int MENU_PREFERENCES = 5;
 	private static final int MENU_POWER_ON_OFF = 6;
 	private static final int MENU_DOWNLOAD_SONG = 7;
+	private static final int MENU_SHUFFLE = 8;
 
 	public static final String EXTRA_PLAYER_ID = "playerId";
 	public static final int PICK_PLAYER = 1;
@@ -73,6 +75,8 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 	private MenuItem mMenuPower;
 	private MenuItem mMenuDownload;
 	private MenuItem mMenuFavorite;
+
+	private MenuItem mMenuShuffle;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -329,9 +333,11 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 		mMenuFavorite = menu.add(0, MENU_ADD_FAVORITE, 0, "Mark as favorite").setIcon(
 				R.drawable.ic_menu_favorite);
 
-		mMenuDownload = menu.add(0, MENU_DOWNLOAD_SONG, 0, "Save to phone")
-				.setIcon(android.R.drawable.ic_menu_save);
+		mMenuShuffle = menu.add(0, MENU_SHUFFLE, 0, "Shuffle mode").setIcon(R.drawable.ic_menu_shuffle);
 
+		mMenuDownload = menu.add(0, MENU_DOWNLOAD_SONG, 0, "Save to phone")
+		.setIcon(android.R.drawable.ic_menu_save);
+		
 		menu.add(0, MENU_PLAYERS, 0, "Select player").setIcon(
 				android.R.drawable.ic_menu_agenda);
 		mMenuPower = menu.add(0, MENU_POWER_ON_OFF, 0, "Power on / off")
@@ -343,16 +349,22 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (mPlayer == null) {
-			mMenuPower.setEnabled(false);
-		} else {
+		
+		boolean hasPlayer = mPlayer != null;
+		mMenuPower.setEnabled(hasPlayer);
+		mMenuPower.setEnabled(hasPlayer);
+		mMenuShuffle.setEnabled(hasPlayer);
+		
+		boolean hasSong = hasPlayer && mCurrentSong != null;
+		mMenuDownload.setEnabled(hasSong);
+		mMenuFavorite.setEnabled(hasSong);
+		
+		if (hasPlayer) {
 			if (mPlayer.isPowerOn())
 				mMenuPower.setTitle("Power off");
 			else
 				mMenuPower.setTitle("Power on");
 			
-			mMenuDownload.setEnabled(mCurrentSong != null);
-			mMenuFavorite.setEnabled(mCurrentSong != null);
 		}
 
 		return super.onPrepareOptionsMenu(menu);
@@ -394,9 +406,35 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 		case MENU_PREFERENCES:
 			setup();
 			return true;
+		case MENU_SHUFFLE:
+			selectShuffleMode();
+			return true;
 		default:
 			return false;
 		}
+	}
+
+	private void selectShuffleMode() {
+		final CharSequence[] items = {"None", "By song", "By album" };
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Shuffle mode");
+		ShuffleMode currentMode = mPlayer.getShuffleMode();
+		builder.setSingleChoiceItems(items, currentMode == null ? -1 : currentMode.ordinal(), new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int item) {
+		        ShuffleMode m = null;
+		        switch (item) {
+		        case 0: m = ShuffleMode.NONE; break;
+		        case 1: m = ShuffleMode.BY_SONG; break;
+		        case 2: m = ShuffleMode.BY_ALBUM; break;
+		        }
+		        mPlayer.setShuffleMode(m);
+		        dialog.dismiss();
+		        Toast.makeText(getApplicationContext(), "Shuffle mode: " + items[item], Toast.LENGTH_SHORT).show();
+		    }
+		});
+		AlertDialog dlg = builder.create();		
+		dlg.show();
 	}
 
 	private void setup() {

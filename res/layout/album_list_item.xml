@@ -11,15 +11,15 @@
 	    android:layout_height="wrap_content"
 	    android:layout_weight="0"
 	    android:textColor="#fff"
-	    android:src="@drawable/ic_mp_album_playback"
+	    android:src="@drawable/unknown_album_cover"
 	    android:layout_marginRight="5pt"		    
-		android:scaleType="center"
-	    android:minWidth="50px"
-	    android:minHeight="50px"
-
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-	/>
+		android:minWidth="50dp"
+	    android:minHeight="50dp"
+	    android:maxWidth="50dp"
+	    android:maxHeight="50dp"
+        android:layout_alignParentTop="true" 
+        android:scaleType="fitXY"
+        />
 
 	<TextView 
 		android:id="@+id/album_name"
@@ -33,7 +33,7 @@
 		android:textColorLink="#eee"
 		android:singleLine="true"
        	android:layout_toRightOf="@id/album_image"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
 	/>
 	<TextView 

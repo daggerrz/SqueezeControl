@@ -2,6 +2,7 @@ package com.squeezecontrol.io;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.utils.URIUtils;
@@ -36,7 +37,7 @@ public class SqueezeCommand {
 	public ArrayList<ArrayList<String>> splitParameters(String expression) {
 		ArrayList<ArrayList<String>> parameterRows = new ArrayList<ArrayList<String>>();
 		
-		// Params on this first row will not be added. I.e all params up until the first
+		// Params on this first row should not be added. I.e all params up until the first
 		// split will be ignored.
 		ArrayList<String> currentRow = new ArrayList<String>();
 		for (String param : mParameters) {
@@ -120,6 +121,15 @@ public class SqueezeCommand {
 		} else {
 			return null;
 		}
+	}
+
+	public List<Map<String, String>> splitToMap(String expression) {
+		ArrayList<ArrayList<String>> lines = splitParameters(expression);
+		List<Map<String, String>> maps = new ArrayList<Map<String,String>>();
+		for (ArrayList<String> line : lines) {
+			maps.add(splitToParameterMap(line));
+		}
+		return maps;
 	}
 	
 }

@@ -16,6 +16,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpResponse;
 
 import android.os.Environment;
+import android.provider.MediaStore.Audio.Media;
 import android.util.Log;
 
 import com.squeezecontrol.BrowseLoadResult;

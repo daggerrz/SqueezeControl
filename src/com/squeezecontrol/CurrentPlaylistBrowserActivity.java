@@ -15,14 +15,16 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.squeezecontrol.io.SqueezePlayer;
 import com.squeezecontrol.io.SqueezePlayerListener;
+import com.squeezecontrol.model.Playlist;
 import com.squeezecontrol.model.Song;
 import com.squeezecontrol.view.BrowseableAdapter;
 
-public class CurrentPlaylistBrowserActivity extends AbstractMusicBrowserActivity<Song> implements SqueezePlayerListener {
+public class CurrentPlaylistBrowserActivity extends
+		AbstractMusicBrowserActivity<Song> implements SqueezePlayerListener {
 
 	private Handler mHandler = new Handler();
 	private int mCurrentPosition;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -33,11 +35,10 @@ public class CurrentPlaylistBrowserActivity extends AbstractMusicBrowserActivity
 		super.init();
 
 	}
-	
+
 	@Override
 	protected BrowseableAdapter<Song> createListAdapter() {
-		return new BrowseableAdapter<Song>(this,
-				R.layout.current_playlist_item) {
+		return new BrowseableAdapter<Song>(this, R.layout.current_playlist_item) {
 			@Override
 			protected void bindView(int position, View view) {
 				Song s = getItem(position);
@@ -65,17 +66,18 @@ public class CurrentPlaylistBrowserActivity extends AbstractMusicBrowserActivity
 			}
 		};
 	}
-	
+
 	@Override
 	protected void onServiceBound(SqueezeService service) {
 		service.getPlayer().addListener(this);
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		SqueezePlayer player = getPlayer();
-		if (player != null) player.removeListener(this);
+		if (player != null)
+			player.removeListener(this);
 	}
 
 	@Override
@@ -84,7 +86,6 @@ public class CurrentPlaylistBrowserActivity extends AbstractMusicBrowserActivity
 			return;
 		getPlayer().setSongIndexInPlayList(position);
 	}
-
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -105,12 +106,18 @@ public class CurrentPlaylistBrowserActivity extends AbstractMusicBrowserActivity
 		return true;
 	}
 
-
 	@Override
 	protected BrowseLoadResult<Song> loadItems(int startIndex, int count)
 			throws IOException {
-		return getSqueezeService().getPlayer().getSongsInCurrentPlaylist(
+		return getPlayer().getSongsInCurrentPlaylist(
 				startIndex, count);
+	}
+
+	@Override
+	protected void onInitialResultLoaded(BrowseLoadResult<Song> result) {
+		if (getPlayer().getSongIndexInPlaylist() > 0) {
+			getListView().setSelection(getPlayer().getSongIndexInPlaylist());
+		}
 	}
 
 	@Override
@@ -122,24 +129,23 @@ public class CurrentPlaylistBrowserActivity extends AbstractMusicBrowserActivity
 			}
 		});
 	}
-	
+
 	@Override
 	public void onPlayerStateChanged() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void addToPlaylist(Song selectedItem) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void play(Song selectedItem, int index) {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 }

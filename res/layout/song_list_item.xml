@@ -13,7 +13,6 @@
 	    android:src="@drawable/ic_mp_song_playback"
 	    android:layout_marginRight="5pt"		    
         android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
 	/>
 
 	<TextView 
