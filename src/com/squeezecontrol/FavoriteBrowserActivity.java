@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.squeezecontrol.model.Artist;
 import com.squeezecontrol.model.Favorite;
-import com.squeezecontrol.model.RadioStation;
+import com.squeezecontrol.model.XmlBrowser;
 import com.squeezecontrol.view.BrowseableAdapter;
 
 public class FavoriteBrowserActivity extends AbstractMusicBrowserActivity<Favorite> {

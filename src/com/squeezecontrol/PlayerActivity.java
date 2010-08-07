@@ -355,7 +355,7 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 		mMenuPower.setEnabled(hasPlayer);
 		mMenuShuffle.setEnabled(hasPlayer);
 		
-		boolean hasSong = hasPlayer && mCurrentSong != null;
+		boolean hasSong = hasPlayer && mCurrentSong != null && mCurrentSong != Song.EMPTY;
 		mMenuDownload.setEnabled(hasSong);
 		mMenuFavorite.setEnabled(hasSong);
 		
@@ -583,13 +583,13 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 	}
 
 	public boolean onLongClick(View view) {
-
-		if (view.equals(mArtistName.getParent())) {
+		Song currentSong = mCurrentSong;
+		if (view.equals(mArtistName.getParent()) && currentSong != null && currentSong.artistId != null) {
 			Intent intent = new Intent(this, AlbumBrowserActivity.class);
 			intent.putExtra(AlbumBrowserActivity.EXTRA_ARTIST_ID, mPlayer
 					.getCurrentSong().artistId);
 			startActivity(intent);
-		} else if (view.equals(mAlbumName.getParent())) {
+		} else if (view.equals(mAlbumName.getParent()) && currentSong != null && currentSong.albumId!= null) {
 			Intent intent = new Intent(this, SongBrowserActivity.class);
 			intent.putExtra(SongBrowserActivity.EXTRA_ALBUM_ID, mPlayer
 					.getCurrentSong().albumId);

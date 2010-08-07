@@ -308,12 +308,16 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 				ad.setCount(totalCount);
 				ad.setNotifyOnChange(true);
 				ad.set(result.getResults(), result.getStartIndex());
-				AbstractMusicBrowserActivity.this.setTitle("Showing "
-						+ totalCount + " " + mTitle
-						+ (totalCount == 1 ? "" : "s"));
+				AbstractMusicBrowserActivity.this
+						.setTitle(getTitle(totalCount));
 				onInitialResultLoaded(result);
 			};
 		});
+	}
+
+	protected CharSequence getTitle(int totalCount) {
+		return "Showing " + totalCount + " " + mTitle
+				+ (totalCount == 1 ? "" : "s");
 	}
 
 	class LoaderThread extends Thread {

@@ -31,7 +31,8 @@ public class BrowseModeActivity extends ListActivity {
 		modes.add(new Action("New music", R.drawable.newmusic));
 		modes.add(new Action("Playlists", R.drawable.playlists));
 		modes.add(new Action("Favorites", R.drawable.favorites));
-		modes.add(new Action("Internet radio", R.drawable.favorites));
+		modes.add(new Action("Internet radio", R.drawable.radio));
+		modes.add(new Action("Apps", R.drawable.plugin));
 
 		setListAdapter(new ArrayAdapter<Action>(this,
 				R.layout.list_item_with_icon, modes){
@@ -90,6 +91,11 @@ public class BrowseModeActivity extends ListActivity {
 			break;
 		case 8:
 			intent = new Intent(this, RadioBrowserActivity.class);
+			intent.putExtra(RadioBrowserActivity.EXTRA_BROWSER_TYPE, RadioBrowserActivity.RADIOS);
+			break;
+		case 9:
+			intent = new Intent(this, RadioBrowserActivity.class);
+			intent.putExtra(RadioBrowserActivity.EXTRA_BROWSER_TYPE, RadioBrowserActivity.APPS);
 			break;
 		}
 		if (intent != null)

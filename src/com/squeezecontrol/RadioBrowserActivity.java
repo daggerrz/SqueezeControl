@@ -10,48 +10,58 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.squeezecontrol.model.Artist;
-import com.squeezecontrol.model.RadioStation;
+import com.squeezecontrol.model.XmlBrowser;
 import com.squeezecontrol.view.BrowseableAdapter;
 
 public class RadioBrowserActivity extends
-		AbstractMusicBrowserActivity<RadioStation> {
+		AbstractMusicBrowserActivity<XmlBrowser> {
 
+	public static final String EXTRA_BROWSER_TYPE = "browser_type";
+	
+	public static final String RADIOS = "radios";
+	public static final String APPS = "apps";
+
+	private String mBrowserType;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mTitle = "radio station";
+		
+		mBrowserType = getIntent().getStringExtra(EXTRA_BROWSER_TYPE);
+		
 		setContentView(R.layout.artist_list);
 		super.init();
 	}
 
 	@Override
-	protected BrowseableAdapter<RadioStation> createListAdapter() {
-		return new BrowseableAdapter<RadioStation>(this,
+	protected BrowseableAdapter<XmlBrowser> createListAdapter() {
+		return new BrowseableAdapter<XmlBrowser>(this,
 				android.R.layout.simple_list_item_1);
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		RadioStation item = getSelectedItem();
+		XmlBrowser item = (XmlBrowser) l.getItemAtPosition(position);
 		if ("xmlbrowser".equals(item.type)) {
 			Intent i = new Intent(this, XmlBrowserActivity.class);
 			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND, item.id);
-			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.title);
+			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.name);
 			startActivity(i);
 		}
 	}
 
 	@Override
-	protected void addToPlaylist(RadioStation selectedItem) {
+	protected void addToPlaylist(XmlBrowser selectedItem) {
 	}
 
 	@Override
-	protected void play(RadioStation selectedItem, int index) {
+	protected void play(XmlBrowser selectedItem, int index) {
 	}
 
 	@Override
-	protected BrowseLoadResult<RadioStation> loadItems(int startIndex, int count)
+	protected BrowseLoadResult<XmlBrowser> loadItems(int startIndex, int count)
 			throws IOException {
-		return getMusicBrowser().getRadios(getQueryString(), startIndex, count);
+		return getMusicBrowser().getBrowsers(mBrowserType, startIndex, count);
 	}
 }

@@ -16,10 +16,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.squeezecontrol.image.ImageLoaderService;
 import com.squeezecontrol.io.SqueezeCommand;
 import com.squeezecontrol.io.SqueezeTaggedRequestBuilder;
 import com.squeezecontrol.model.Album;
-import com.squeezecontrol.model.RadioStation;
+import com.squeezecontrol.model.XmlBrowser;
 import com.squeezecontrol.model.XmlBrowserEntry;
 import com.squeezecontrol.view.BrowseableAdapter;
 
@@ -31,68 +32,88 @@ public class XmlBrowserActivity extends
 	public static final String EXTRA_BROWSER_TITLE = "browser_title";
 	private String mBrowserCommand;
 	private String mItemId;
+	private Callback<Bitmap> mImageCallback;
+	private ImageLoaderService mImageLoaderService;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mTitle = "radio station";
+		mTitle = "Loading...";
 		setContentView(R.layout.generic_list);
 
 		mBrowserCommand = getIntent().getStringExtra(
 				EXTRA_BROWSER_COMMAND_COMMAND);
 		mItemId = getIntent().getStringExtra(EXTRA_ITEM_ID);
+		String title = getIntent().getStringExtra(EXTRA_BROWSER_TITLE);
+		if (title != null) mTitle = title;
+
+		final Runnable notifyChanges = new Runnable() {
+			public void run() {
+				getListAdapter().notifyDataSetChanged();
+			};
+		};
+		mImageCallback = new Callback<Bitmap>() {
+			public void handle(Bitmap value) {
+				getListView().post(notifyChanges);
+			};
+		};
 
 		super.init();
 
 	}
 
 	@Override
+	protected void onServiceBound(SqueezeService service) {
+		super.onServiceBound(service);
+		mImageLoaderService = service.getGenericImageService();
+	}
+
+	@Override
 	protected BrowseableAdapter<XmlBrowserEntry> createListAdapter() {
-		return new BrowseableAdapter<XmlBrowserEntry>(this, R.layout.xmlbrowser_list_item) {
+		return new BrowseableAdapter<XmlBrowserEntry>(this,
+				R.layout.xmlbrowser_list_item) {
 			@Override
 			protected void bindView(int position, View view) {
 				XmlBrowserEntry a = getItem(position);
 
-				ImageView icon = (ImageView) view
-						.findViewById(R.id.icon);
-				TextView name = (TextView) findViewById(R.id.name);
+				ImageView icon = (ImageView) view.findViewById(R.id.icon);
+				TextView name = (TextView) view.findViewById(R.id.name);
 				if (a == null) {
 					name.setText(R.string.loading_progress);
 					icon.setImageResource(R.drawable.unknown_album_cover);
 				} else {
-//					if (a.artwork_track_id == null) {
-//						coverImage
-//								.setImageResource(R.drawable.unknown_album_cover);
-//					} else {
-//						Bitmap image = mCoverImageService.getFromCache(a);
-//						if (image != null) {
-//							coverImage.setImageBitmap(image);
-//						} else {
-//							coverImage
-//									.setImageResource(R.drawable.unknown_album_cover);
-//							if (mLoadArt) {
-//								mCoverImageService.loadImage(a, mImageCallback);
-//							}
-//
-//						}
-//					}
-//					albumName.setText(a.getName());
-//					if (getQueryPattern() != null) {
-//						Linkify.addLinks(albumName, getQueryPattern(), null);
-//					}
-//					artistName.setText(a.artistName);
+					if (a.icon == null) {
+						if (a.hasItems)
+							icon.setImageResource(R.drawable.musicfolder);
+						else if (a.isAudio)
+							icon.setImageResource(R.drawable.tuneinurl);
+						else 
+							icon.setImageResource(R.drawable.unknown_album_cover);
+					} else {
+						Bitmap image = mImageLoaderService.getFromCache(a.icon);
+						if (image != null) {
+							icon.setImageBitmap(image);
+						} else {
+							icon.setImageResource(R.drawable.unknown_album_cover);
+							mImageLoaderService
+									.loadImage(a.icon, mImageCallback);
+
+						}
+					}
+					name.setText(a.name);
 				}
 			}
-		};	}
+		};
+	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		XmlBrowserEntry item = getSelectedItem();
-		if ("link".equals(item.type)) {
+		XmlBrowserEntry item = (XmlBrowserEntry) l.getItemAtPosition(position);
+		if (item.hasItems) {
 			Intent i = new Intent(this, XmlBrowserActivity.class);
 			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND,
 					mBrowserCommand);
-			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.title);
+			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.title == null ? item.name : item.title);
 			i.putExtra(XmlBrowserActivity.EXTRA_ITEM_ID, item.id);
 			startActivity(i);
 		} else {
@@ -103,6 +124,11 @@ public class XmlBrowserActivity extends
 		}
 	}
 	
+	@Override
+	protected CharSequence getTitle(int totalCount) {
+		return mTitle;
+	}
+
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
@@ -137,11 +163,14 @@ public class XmlBrowserActivity extends
 			for (Map<String, String> m : maps) {
 				entry = new XmlBrowserEntry();
 				entry.id = m.get("id");
-				entry.title = m.get("title");
 				entry.name = m.get("name");
+				entry.title = m.get("title");
 				entry.type = m.get("type");
 				entry.hasItems = "1".equals(m.get("hasitems"));
+				entry.isAudio = "1".equals(m.get("isaudio"));
 				entry.url = m.get("url");
+				entry.icon = m.get("image");
+				
 				entries.add(entry);
 
 				if (m.containsKey("count"))

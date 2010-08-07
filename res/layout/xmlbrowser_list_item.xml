@@ -8,15 +8,12 @@
 	<ImageView
 		android:id="@+id/icon"
 	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_weight="0"
 	    android:textColor="#fff"
 	    android:src="@drawable/artists"
 	    android:layout_marginRight="5pt"		    
-		android:scaleType="matrix"
-	    android:minHeight="50dip"
+		android:minHeight="50dip"
 	    android:maxHeight="50dip"
-	/>
+	    android:layout_height="wrap_content" android:adjustViewBounds="true" android:maxWidth="50dip" android:minWidth="50dip" android:scaleType="fitStart"/>
 
 	<TextView 
 		android:id="@+id/name"

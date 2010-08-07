@@ -70,6 +70,12 @@ public class AlbumBrowserActivity extends AbstractMusicBrowserActivity<Album>
 	}
 
 	@Override
+	protected void onServiceBound(SqueezeService service) {
+		super.onServiceBound(service);
+		mCoverImageService = service.getCoverImageService();
+	}
+	
+	@Override
 	protected BrowseableAdapter<Album> createListAdapter() {
 		return new BrowseableAdapter<Album>(this, R.layout.album_list_item) {
 			@Override
@@ -114,12 +120,7 @@ public class AlbumBrowserActivity extends AbstractMusicBrowserActivity<Album>
 		};
 	}
 
-	@Override
-	protected void onServiceBound(SqueezeService service) {
-		super.onServiceBound(service);
-		mCoverImageService = service.getCoverImageService();
-	}
-	
+
 	@Override
 	protected int getMenuResource() {
 		return R.menu.browse_menu_with_download;

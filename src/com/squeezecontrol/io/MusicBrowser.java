@@ -15,7 +15,7 @@ import com.squeezecontrol.model.Favorite;
 import com.squeezecontrol.model.FolderItem;
 import com.squeezecontrol.model.Genre;
 import com.squeezecontrol.model.Playlist;
-import com.squeezecontrol.model.RadioStation;
+import com.squeezecontrol.model.XmlBrowser;
 import com.squeezecontrol.model.Song;
 
 public class MusicBrowser {
@@ -291,15 +291,13 @@ public class MusicBrowser {
 		return new BrowseLoadResult<FolderItem>(count, startIndex, items);
 	}
 
-	public BrowseLoadResult<RadioStation> getRadios(String searchString,
+	public BrowseLoadResult<XmlBrowser> getBrowsers(String type,
 			int startIndex, int pageSize) {
-		ArrayList<RadioStation> radios = new ArrayList<RadioStation>(pageSize);
+		ArrayList<XmlBrowser> radios = new ArrayList<XmlBrowser>(pageSize);
 		int count = 0;
 		try {
 			SqueezeTaggedRequestBuilder command = new SqueezeTaggedRequestBuilder(
-					"radios " + startIndex + " " + pageSize);
-			if (searchString != null && !"".equals(searchString))
-				command.addTag("search", Uri.encode(searchString));
+					type +" " + startIndex + " " + pageSize);
 			SqueezeCommand res = mBroker.sendRequest(command.toString());
 
 			// Count comes first here
@@ -310,11 +308,9 @@ public class MusicBrowser {
 				}
 			}
 			
-			RadioStation radio = null;
 			List<Map<String, String>> maps = res.splitToMap("icon");
 			for (Map<String, String> m : maps) {
-				radio = new RadioStation();
-				radio.title = m.get("title");
+				XmlBrowser radio = new XmlBrowser();
 				radio.icon = m.get("icon");
 				radio.name = m.get("name");
 				radio.id = m.get("cmd");
@@ -323,7 +319,7 @@ public class MusicBrowser {
 			}
 		} catch (IOException e) {
 		}
-		return new BrowseLoadResult<RadioStation>(count, startIndex, radios);
+		return new BrowseLoadResult<XmlBrowser>(count, startIndex, radios);
 	}
 
 	public BrowseLoadResult<Favorite> getFavorites(String searchString,
