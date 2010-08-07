@@ -291,36 +291,6 @@ public class MusicBrowser {
 		return new BrowseLoadResult<FolderItem>(count, startIndex, items);
 	}
 
-	public BrowseLoadResult<XmlBrowser> getBrowsers(String type,
-			int startIndex, int pageSize) {
-		ArrayList<XmlBrowser> radios = new ArrayList<XmlBrowser>(pageSize);
-		int count = 0;
-		try {
-			SqueezeTaggedRequestBuilder command = new SqueezeTaggedRequestBuilder(
-					type +" " + startIndex + " " + pageSize);
-			SqueezeCommand res = mBroker.sendRequest(command.toString());
-
-			// Count comes first here
-			for (String c : res.getParameters()) {
-				if (c.startsWith("count%3A")) {
-					count = Integer.parseInt(c.substring("count%3A".length()));
-					break;
-				}
-			}
-			
-			List<Map<String, String>> maps = res.splitToMap("icon");
-			for (Map<String, String> m : maps) {
-				XmlBrowser radio = new XmlBrowser();
-				radio.icon = m.get("icon");
-				radio.name = m.get("name");
-				radio.id = m.get("cmd");
-				radio.type = m.get("type");
-				radios.add(radio);
-			}
-		} catch (IOException e) {
-		}
-		return new BrowseLoadResult<XmlBrowser>(count, startIndex, radios);
-	}
 
 	public BrowseLoadResult<Favorite> getFavorites(String searchString,
 			int startIndex, int pageSize) {
