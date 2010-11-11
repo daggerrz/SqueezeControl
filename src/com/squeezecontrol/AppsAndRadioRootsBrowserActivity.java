@@ -18,11 +18,11 @@ import com.squeezecontrol.model.XmlBrowser;
 import com.squeezecontrol.view.BrowseableAdapter;
 
 /**
- * The roots of apps and radios hav a special query and response format, so it cannot
- * be the same as {@link XmlBrowserActivity}.
+ * The roots of apps and radios hav a special query and response format, so it
+ * cannot be the same as {@link XmlBrowserActivity}.
  * 
  * @author liodden
- *
+ * 
  */
 public class AppsAndRadioRootsBrowserActivity extends
 		AbstractMusicBrowserActivity<XmlBrowser> {
@@ -53,14 +53,16 @@ public class AppsAndRadioRootsBrowserActivity extends
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		XmlBrowser item = (XmlBrowser) l.getItemAtPosition(position);
-		if ("xmlbrowser".equals(item.type)) {
-			Intent i = new Intent(this, XmlBrowserActivity.class);
+		if (item == null)
+			return;
+		Intent i = new Intent(this, XmlBrowserActivity.class);
 
-			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND,
-					item.cmd);
-			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.name);
-			startActivity(i);
+		i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND, item.cmd);
+		i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, item.name);
+		if ("xmlbrowser_search".equals(item.type)) {
+			i.putExtra(XmlBrowserActivity.EXTRA_SEARCH_MODE, true);
 		}
+		startActivity(i);
 	}
 
 	@Override

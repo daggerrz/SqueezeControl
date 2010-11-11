@@ -32,6 +32,8 @@ public class GenreBrowserActivity extends AbstractMusicBrowserActivity<Genre> {
 		if (position < 0)
 			return;
 		Genre selectedItem = (Genre) getListAdapter().getItem(position);
+		if (selectedItem == null) return;
+		
 		Intent intent = new Intent(this, ArtistBrowserActivity.class);
 		intent.putExtra(ArtistBrowserActivity.EXTRA_GENRE_ID, selectedItem.getId());
 		startActivity(intent);		

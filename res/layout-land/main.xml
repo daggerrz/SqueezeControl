@@ -5,6 +5,8 @@
     android:layout_height="fill_parent"
 	android:id="@+id/Main" 
     >
+    
+    
 	<LinearLayout 
 		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"
@@ -53,7 +55,7 @@
 	        android:paddingLeft="11dip"
 	        android:paddingTop="4dip"
 	        android:paddingBottom="8dip">
-		
+			        		
 		        <ImageView
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
@@ -159,5 +161,5 @@
 			android:layout_weight="2"
 			android:visible="false"
 			android:scaleType="fitStart"/>
-				
+					
 </LinearLayout>
