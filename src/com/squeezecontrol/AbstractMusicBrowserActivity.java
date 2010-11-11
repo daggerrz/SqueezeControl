@@ -32,6 +32,7 @@ import com.squeezecontrol.io.MusicBrowser;
 import com.squeezecontrol.io.SqueezePlayer;
 import com.squeezecontrol.model.Browsable;
 import com.squeezecontrol.view.BrowseableAdapter;
+import com.squeezecontrol.view.NowPlayingView;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
@@ -161,6 +162,7 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 	}
 
 	protected void onServiceBound(SqueezeService service) {
+		new NowPlayingView(this, service);
 	}
 
 	protected void onInitialResultLoaded(BrowseLoadResult<T> result) {

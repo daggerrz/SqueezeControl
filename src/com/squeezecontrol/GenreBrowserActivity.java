@@ -18,7 +18,7 @@ public class GenreBrowserActivity extends AbstractMusicBrowserActivity<Genre> {
 		super.onCreate(savedInstanceState);
 		mTitle = "genre";
 
-		setContentView(R.layout.generic_list);
+		setContentView(R.layout.default_browser_list);
 		super.init();
 	}
 	

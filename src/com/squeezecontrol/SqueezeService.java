@@ -3,7 +3,7 @@ package com.squeezecontrol;
 import java.io.IOException;
 
 import android.app.Activity;
-import android.app.Service;
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,16 +18,17 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.squeezecontrol.download.MusicDownloadService;
-import com.squeezecontrol.image.ImageLoaderService;
 import com.squeezecontrol.image.HttpFetchingImageStore;
+import com.squeezecontrol.image.ImageLoaderService;
 import com.squeezecontrol.io.SqueezeBroker;
 import com.squeezecontrol.io.SqueezeEventListener;
 import com.squeezecontrol.io.SqueezePlayer;
 import com.squeezecontrol.model.Song;
 
-public class SqueezeService extends Service implements SqueezeEventListener {
+public class SqueezeService implements SqueezeEventListener {
 
-	private final SqueezeServiceBinder binder = new SqueezeServiceBinder();
+	private Application mContext;
+	
 	private Handler mHandler = new Handler();
 	private SqueezeBroker mBroker;
 	private SqueezePlayer mPlayer;
@@ -43,30 +44,44 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 	private ImageLoaderService mGenericImageService;
 
 	private MusicDownloadService mDownloadService;
+	
+	private static SqueezeService sInstance = null;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+	public static SqueezeService getInstance() {
+		return sInstance;
+	}
+	
+	/**
+	 * Should only be called on Application start.
+	 */
+	public static SqueezeService createService(Application application) {
+		sInstance = new SqueezeService(application);
+		return sInstance;
+	}
+
+	public SqueezeService(Application application) {
+		mContext = application;
 		initialize();
 		IntentFilter filter = new IntentFilter(
 				"android.net.conn.CONNECTIVITY_CHANGE");
-		registerReceiver(mConnectivityStateReceiver, filter);
+		mContext.registerReceiver(mConnectivityStateReceiver, filter);
 	}
+
 
 	public void initialize() {
 		if (mBroker != null) {
 			mBroker.disconnect();
 		}
-		String username = Settings.getUsername(this);
-		String password = Settings.getPassword(this);
-		mBroker = new SqueezeBroker(Settings.getHost(this), Settings
-				.getCLIPort(this), username, password, this);
+		String username = Settings.getUsername(mContext);
+		String password = Settings.getPassword(mContext);
+		mBroker = new SqueezeBroker(Settings.getHost(mContext), Settings
+				.getCLIPort(mContext), username, password, this);
 
 		final MusicDownloadNotificationManager notManager = new MusicDownloadNotificationManager(
-				this);
+				mContext);
 		mDownloadService = new MusicDownloadService(mBroker.getMusicBrowser(),
 				"http://" + mBroker.getHost() + ":"
-						+ Settings.getHTTPPort(this) + "/music/", username,
+						+ Settings.getHTTPPort(mContext) + "/music/", username,
 				password) {
 			@Override
 			protected void onDownloadStarted(Song song, int songsInQueue) {
@@ -88,7 +103,7 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 				// Let the media scanner pick it up
 				if (songsInQueue == 0) {
 					postToast("Music download completed", Toast.LENGTH_SHORT);
-					sendBroadcast(new Intent(
+					mContext.sendBroadcast(new Intent(
 							Intent.ACTION_MEDIA_MOUNTED,
 							Uri
 									.parse("file://"
@@ -109,7 +124,7 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 		mDownloadService.start();
 
 		mCoverImageStore = new HttpFetchingImageStore("http://" + mBroker.getHost()
-				+ ":" + Settings.getHTTPPort(this) + "/music/", username,
+				+ ":" + Settings.getHTTPPort(mContext) + "/music/", username,
 				password);
 		mCoverImageService = new ImageLoaderService(mCoverImageStore);
 		
@@ -118,7 +133,7 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 		mGenericImageService = new ImageLoaderService(mGenericImageStore);
 		
 
-		mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		mConnectivityStateReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -132,19 +147,23 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 
 			@Override
 			public void run() {
-				Toast.makeText(SqueezeService.this, message, length).show();
+				Toast.makeText(mContext, message, length).show();
 			}
 		});
 	}
 
-	@Override
-	public void onStart(Intent intent, int startId) {
-		super.onStart(intent, startId);
+	public void start() {
 		startIfWifiAccess();
+	}
+	
+	public void stop() {
+		mBroker.disconnect();
+		if (mDownloadService != null)
+			mDownloadService.stop();		
 	}
 
 	private void startIfWifiAccess() {
-		if (!Settings.isConfigured(this))
+		if (!Settings.isConfigured(mContext))
 			return;
 
 		NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
@@ -164,30 +183,6 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		mBroker.disconnect();
-		if (mDownloadService != null)
-			mDownloadService.stop();
-	}
-
-	@Override
-	public boolean onUnbind(Intent intent) {
-		return super.onUnbind(intent);
-	}
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		return binder;
-	}
-
-	public class SqueezeServiceBinder extends Binder {
-		SqueezeService getService() {
-			return SqueezeService.this;
-		}
-	}
-
-	@Override
 	public void onConnect(final SqueezeBroker broker) {
 	}
 
@@ -197,18 +192,11 @@ public class SqueezeService extends Service implements SqueezeEventListener {
 
 	@Override
 	public void onDisconnect(final SqueezeBroker broker) {
-		/*
-		 * mHandler.post(new Runnable() {
-		 * 
-		 * @Override public void run() { Toast.makeText(SqueezeService.this,
-		 * "Disconnected from " + broker.getHost(), Toast.LENGTH_SHORT).show();
-		 * } });
-		 */
 	}
 
 	public SqueezePlayer getPlayer() {
 		if (mPlayer == null) {
-			String playerId = Settings.getPlayerId(this);
+			String playerId = Settings.getPlayerId(mContext);
 			if (playerId != null) {
 				mPlayer = mBroker.getPlayer(playerId);
 			}

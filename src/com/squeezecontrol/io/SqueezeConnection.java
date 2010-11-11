@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import android.net.Uri;
@@ -43,10 +44,11 @@ public class SqueezeConnection {
 
 	public synchronized void open() throws IOException {
 		// Log.d(TAG, "Opening socket");
-		mSocket = new Socket(mHost, mPort);
+		mSocket = new Socket();
+		mSocket.connect(new InetSocketAddress(mHost, mPort), 4000);
 		mInputReader = new BufferedReader(new InputStreamReader(mSocket
-				.getInputStream()));
-		mOuputStream = new BufferedOutputStream(mSocket.getOutputStream());
+				.getInputStream()), 1024);
+		mOuputStream = new BufferedOutputStream(mSocket.getOutputStream(), 1024);
 
 		mLoggingIn = true;
 		sendCommand("login " + Uri.encode(mUsername) + " "

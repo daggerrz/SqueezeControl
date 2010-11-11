@@ -38,7 +38,7 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
 			mArtistId = extras.getString(EXTRA_ARTIST_ID);
 		}
 
-		setContentView(R.layout.song_list);
+		setContentView(R.layout.default_browser_list);
 
 		super.init();
 	}

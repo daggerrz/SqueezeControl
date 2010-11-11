@@ -23,7 +23,7 @@ public class MusicFolderBrowserActivity extends
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mTitle = "item";
-		setContentView(R.layout.generic_list);
+		setContentView(R.layout.default_browser_list);
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {

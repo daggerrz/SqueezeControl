@@ -103,17 +103,24 @@ public class SqueezePlayer {
 
 				} else if ("newsong".equals(firstParam)) {
 
-					// Song?
+					// In playlist?
 					if (command.getParameters().length == 3) {
 						int indexInPlayList = Integer.valueOf(command
 								.getLastParameter());
 						updateSongIndexInPlayList(indexInPlayList);
+						// Ask for more info
 						getSongInPlayList(mCurrentPlaylistIndex,
 								mCurrentSongCallback);
 					} else {
 						// Radio
 						updateSongIndexInPlayList(-1);
-						Song radio = Song.forName(command.getLastParameter());
+					}
+					// Set the name for now, and wait for extra info if available
+					if (command.getParameters().length > 1) {
+						String name = command.getParameters()[1];
+						if (name != null)
+							name = SqueezeCommand.decode(name);
+						Song radio = Song.forName(name);
 						mCurrentSongCallback.handleResponse(radio);
 					}
 				} else if ("shuffle".equals(firstParam)) {
@@ -131,6 +138,8 @@ public class SqueezePlayer {
 						break;
 					}
 					notifyPlayerStateChange();
+				} else if ("stop".equals(firstParam)) {
+					mCurrentSongCallback.handleResponse(null);
 				}
 			} else if ("pause".equals(c)) {
 				// Paused / unpaused
@@ -215,9 +224,11 @@ public class SqueezePlayer {
 		song.artist = pMap.get("artist");
 		song.album = pMap.get("album");
 		song.albumId = pMap.get("album_id");
-		song.id = pMap.get("id");
 		song.artistId = pMap.get("artist_id");
 		song.path = pMap.get("url");
+		song.id = pMap.get("id");
+		if (song.id == null) song.id = song.path;
+		if (song.title == null) song.title = song.path;
 		if (song.id == null)
 			song = null;
 		return song;
@@ -362,7 +373,7 @@ public class SqueezePlayer {
 	public ShuffleMode getShuffleMode() {
 		return mShuffleMode;
 	}
-	
+
 	public void setShuffleMode(ShuffleMode mode) {
 		sendCommand("playlist shuffle " + mode.ordinal());
 	}

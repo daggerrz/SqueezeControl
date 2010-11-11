@@ -31,7 +31,7 @@ public class CurrentPlaylistBrowserActivity extends
 
 		mTitle = "playlist item";
 
-		setContentView(R.layout.current_playlist);
+		setContentView(R.layout.default_browser_list);
 		super.init();
 
 	}

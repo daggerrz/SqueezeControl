@@ -22,6 +22,7 @@ import android.widget.AbsListView.OnScrollListener;
 import com.squeezecontrol.image.ImageLoaderService;
 import com.squeezecontrol.model.Album;
 import com.squeezecontrol.view.BrowseableAdapter;
+import com.squeezecontrol.view.NowPlayingView;
 
 public class AlbumBrowserActivity extends AbstractMusicBrowserActivity<Album>
 		implements ListView.OnScrollListener {
@@ -41,7 +42,7 @@ public class AlbumBrowserActivity extends AbstractMusicBrowserActivity<Album>
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		mTitle = "album";
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -51,7 +52,7 @@ public class AlbumBrowserActivity extends AbstractMusicBrowserActivity<Album>
 				mSortMode = SORT_MODE_ALBUM;
 		}
 
-		setContentView(R.layout.album_list);
+		setContentView(R.layout.default_browser_list);
 
 		final Runnable notifyChanges = new Runnable() {
 			public void run() {

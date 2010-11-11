@@ -40,7 +40,7 @@ public class AppsAndRadioRootsBrowserActivity extends
 
 		mBrowserType = getIntent().getStringExtra(EXTRA_BROWSER_TYPE);
 
-		setContentView(R.layout.artist_list);
+		setContentView(R.layout.default_browser_list);
 		super.init();
 	}
 
