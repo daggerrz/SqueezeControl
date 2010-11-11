@@ -5,13 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.text.util.Linkify;
 import android.view.ContextMenu;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,13 +33,13 @@ public class XmlBrowserActivity extends
 	public static final String EXTRA_BROWSER_COMMAND_COMMAND = "browser_command";
 	public static final String EXTRA_ITEM_ID = "browser_item_id";
 	public static final String EXTRA_BROWSER_TITLE = "browser_title";
-	public static final String EXTRA_SEARCH_PARAM = "browser_search";
+	public static final String EXTRA_SEARCH_MODE = "browser_search";
 
 	private String mBrowserCommand;
 	private String mItemId;
 	private Callback<Bitmap> mImageCallback;
 	private ImageLoaderService mImageLoaderService;
-	private String mSearchParam;
+	private boolean mSearchMode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,7 +50,8 @@ public class XmlBrowserActivity extends
 		mBrowserCommand = getIntent().getStringExtra(
 				EXTRA_BROWSER_COMMAND_COMMAND);
 		mItemId = getIntent().getStringExtra(EXTRA_ITEM_ID);
-		mSearchParam = getIntent().getStringExtra(EXTRA_SEARCH_PARAM);
+		mSearchMode = getIntent().getBooleanExtra(EXTRA_SEARCH_MODE, false);
+
 		String title = getIntent().getStringExtra(EXTRA_BROWSER_TITLE);
 		if (title != null)
 			mTitle = title;
@@ -64,7 +68,11 @@ public class XmlBrowserActivity extends
 		};
 
 		super.init();
+	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
 	}
 
 	@Override
@@ -117,13 +125,10 @@ public class XmlBrowserActivity extends
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		XmlBrowserEntry item = (XmlBrowserEntry) l.getItemAtPosition(position);
-		openItem(item, null);
-	}
+		if (item == null)
+			return;
 
-	private void openItem(XmlBrowserEntry item, String param) {
-		if ("search".equals(item.type) && param == null) {
-			openItem(item, "oasis");
-		} else if (item.hasItems) {
+		if (item.hasItems) {
 
 			Intent i = new Intent(this, XmlBrowserActivity.class);
 			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND,
@@ -131,7 +136,8 @@ public class XmlBrowserActivity extends
 			i.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE,
 					item.title == null ? item.name : item.title);
 			i.putExtra(XmlBrowserActivity.EXTRA_ITEM_ID, item.id);
-			i.putExtra(XmlBrowserActivity.EXTRA_SEARCH_PARAM, param);
+			i.putExtra(XmlBrowserActivity.EXTRA_SEARCH_MODE,
+					"search".equals(item.type));
 			startActivity(i);
 		} else {
 			getPlayer().sendCommand(
@@ -139,7 +145,6 @@ public class XmlBrowserActivity extends
 							+ " playlist play").addTag("item_id", item.id)
 							.toString());
 		}
-
 	}
 
 	@Override
@@ -174,8 +179,26 @@ public class XmlBrowserActivity extends
 					mBrowserCommand + " items " + startIndex + " " + pageSize);
 			if (mItemId != null)
 				command.addTag("item_id", mItemId);
-			if (mSearchParam != null)
-				command.addTag("search", mSearchParam);
+			boolean hasQuery = getQueryString() != null
+					&& !"".equals(getQueryString());
+			if (mSearchMode) {
+				if (!hasQuery) {
+					XmlBrowserEntry e = new XmlBrowserEntry();
+					e.type = "text";
+					e.name = "Enter search criteria";
+					entries.add(e);
+					count = 1;
+					return new BrowseLoadResult<XmlBrowserEntry>(count,
+							startIndex, entries);
+				}
+			}
+
+			// All items have search, but search-services _need_ a query (hence
+			// the check above)
+			if (hasQuery) {
+				command.addTag("search", getQueryString());
+			}
+
 			SqueezeCommand res = getPlayer().sendRequest(command.toString());
 
 			XmlBrowserEntry entry = null;

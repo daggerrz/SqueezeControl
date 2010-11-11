@@ -44,6 +44,8 @@ public class MusicFolderBrowserActivity extends
 			return;
 		FolderItem selectedItem = (FolderItem) getListAdapter().getItem(
 				position);
+		if (selectedItem == null) return;
+		
 		if (FolderItem.FOLDER.equals(selectedItem.type)) {
 		Intent intent = new Intent(this, MusicFolderBrowserActivity.class);
 		intent.putExtra(MusicFolderBrowserActivity.EXTRA_FOLDER_ID,

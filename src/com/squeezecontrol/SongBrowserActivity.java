@@ -26,11 +26,11 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
 
 	private String mAlbumId = null;
 	private String mArtistId = null;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mTitle = "song";			
+		mTitle = "song";
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -39,14 +39,13 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
 		}
 
 		setContentView(R.layout.song_list);
-		
+
 		super.init();
 	}
-	
+
 	@Override
 	protected BrowseableAdapter<Song> createListAdapter() {
-		return new BrowseableAdapter<Song>(this,
-				R.layout.song_list_item) {
+		return new BrowseableAdapter<Song>(this, R.layout.song_list_item) {
 			@Override
 			protected void bindView(int position, View view) {
 				Song s = getItem(position);
@@ -78,7 +77,10 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		if (position < 0)
 			return;
-		addToPlaylist((Song) l.getItemAtPosition(position));
+		Song item = (Song) l.getItemAtPosition(position);
+		if (item == null)
+			return;
+		addToPlaylist(item);
 	}
 
 	@Override
@@ -91,7 +93,7 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
 	protected void download(Song selectedItem) {
 		getDownloadService().queueSongForDownload(selectedItem);
 	}
-	
+
 	protected int getMenuResource() {
 		return R.menu.browse_menu_with_download;
 	}
@@ -101,13 +103,11 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
 		getPlayer().playNow(selectedItem);
 	}
 
-
 	@Override
 	protected BrowseLoadResult<Song> loadItems(int startIndex, int count)
 			throws IOException {
-		return getMusicBrowser().getSongs(getQueryString(), mAlbumId, mArtistId,
-				startIndex, count);
+		return getMusicBrowser().getSongs(getQueryString(), mAlbumId,
+				mArtistId, startIndex, count);
 	}
-	
 
 }

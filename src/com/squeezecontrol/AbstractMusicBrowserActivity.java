@@ -59,6 +59,8 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 	// changed.
 	private long mQueryVersion = 0;
 
+	private boolean mHasData = false;
+
 	private int mCurrentPosition;
 	private LoaderThread mLoaderThread = null;
 	private LinkedBlockingQueue<PageLoadCommand> mPageLoadQueue = new LinkedBlockingQueue<PageLoadCommand>();
@@ -295,6 +297,7 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 
 	protected void updateGUI(final BrowseLoadResult<T> result) {
 		guiHandler.post(new Runnable() {
+
 			public void run() {
 				// We're now back on the gui thread. Check if
 				// the query version has changed
@@ -310,7 +313,10 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 				ad.set(result.getResults(), result.getStartIndex());
 				AbstractMusicBrowserActivity.this
 						.setTitle(getTitle(totalCount));
-				onInitialResultLoaded(result);
+				if (!mHasData) {
+					onInitialResultLoaded(result);
+					mHasData = true;
+				}
 			};
 		});
 	}

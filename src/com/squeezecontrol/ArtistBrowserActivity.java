@@ -41,6 +41,7 @@ public class ArtistBrowserActivity extends AbstractMusicBrowserActivity<Artist> 
 		if (position < 0)
 			return;
 		Artist selectedItem = (Artist) getListAdapter().getItem(position);
+		if (selectedItem == null) return;
 		Intent intent = new Intent(this, AlbumBrowserActivity.class);
 		intent.putExtra(AlbumBrowserActivity.EXTRA_ARTIST_ID, selectedItem.getId());
 		startActivity(intent);		

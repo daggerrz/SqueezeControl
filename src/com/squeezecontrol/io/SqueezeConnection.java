@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class SqueezeConnection {
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	public static String TAG = "SqueezeConnection";
 
 	private String mHost;

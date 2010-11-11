@@ -12,6 +12,7 @@ public class PathUtils {
 		replaceMap.put('<', ' ');
 		replaceMap.put('<', ' ');
 		replaceMap.put('>', ' ');
+		replaceMap.put('?', ' ');
 	}
 	
 	public static String escapeInvalidPathCharacters(String pathSegment) {

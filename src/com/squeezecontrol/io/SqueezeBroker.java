@@ -154,6 +154,22 @@ public class SqueezeBroker {
 	public FutureResponse<SqueezeCommand> sendRequest(String command,
 			ResponseCallback<SqueezeCommand> callback) {
 		String reqId = String.valueOf(requestIdGenerator.addAndGet(1));
+		
+		// If more requests are sent simultaneously, SC will ignore all but the first.
+		// We have to wait...
+		while (responseMap.size() > 0) {
+			Iterator<String> it = responseMap.keySet().iterator();
+			if (it.hasNext()) {
+				String key = it.next();
+				FutureResponse<SqueezeCommand> f = responseMap.get(key);
+				if (f != null)
+					try {
+						f.getResponse();
+					} catch (InterruptedException e) {
+					}
+			}
+		}
+		
 		FutureResponse<SqueezeCommand> respHolder = new FutureResponse<SqueezeCommand>(
 				callback);
 		responseMap.put(reqId, respHolder);
@@ -163,12 +179,13 @@ public class SqueezeBroker {
 
 	private void handleResponse(SqueezeCommand command, String requestIdString) {
 		String reqId = requestIdString.substring(REQUEST_TAG.length());
-		FutureResponse<SqueezeCommand> respHolder = responseMap.get(reqId);
+		FutureResponse<SqueezeCommand> respHolder = responseMap.remove(reqId);
 		// if (DEBUG)
 		// Log.d(TAG, "Response for " + reqId);
 		if (respHolder != null) {
 			respHolder.setResponse(command);
 		}
+		
 	}
 
 	public boolean isConnected() {
