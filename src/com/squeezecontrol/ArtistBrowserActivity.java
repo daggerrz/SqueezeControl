@@ -27,7 +27,7 @@ public class ArtistBrowserActivity extends AbstractMusicBrowserActivity<Artist> 
 			mGenreId = extras.getString(EXTRA_GENRE_ID);
 		}
 
-		setContentView(R.layout.artist_list);
+		setContentView(R.layout.default_browser_list);
 		super.init();
 	}
 	

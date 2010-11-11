@@ -1,6 +1,5 @@
 package com.squeezecontrol;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import android.app.Activity;
@@ -9,45 +8,21 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.DialogInterface.OnClickListener;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.util.Log;
 
 public class ServiceUtils {
 
-	private static HashMap<Context, ServiceConnection> mServiceConnections = new HashMap<Context, ServiceConnection>();
 
 	public static boolean bindToService(Context context,
 			SqueezeServiceConnection serviceConnection) {
-		Intent bindIntent = new Intent(context, SqueezeService.class);
-		context.startService(bindIntent);
-		mServiceConnections.put(context, serviceConnection);
-		return context.bindService(bindIntent, serviceConnection,
-				Context.BIND_AUTO_CREATE);
+		serviceConnection.onServiceConnected(SqueezeService.getInstance());
+		return true;
 	}
 
 	public static void unbindFromService(Context context) {
-		ServiceConnection conn = (ServiceConnection) mServiceConnections
-				.remove(context);
-		if (conn == null) {
-			Log.e("ServiceUtils", "Trying to unbind for unknown Context");
-			return;
-		}
-		context.unbindService(conn);
-		if (mServiceConnections.size() == 0) closeService();
-	}
-
-	public static void closeService() {
-		for (Map.Entry<Context, ServiceConnection> e : mServiceConnections
-				.entrySet()) {
-			unbindFromService(e.getKey());
-			Intent bindIntent = new Intent(e.getKey(), SqueezeService.class);
-			e.getKey().stopService(bindIntent);
-		}
 	}
 
 	public static Dialog createWaitScreen(Context context) {

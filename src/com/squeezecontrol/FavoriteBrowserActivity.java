@@ -20,7 +20,7 @@ public class FavoriteBrowserActivity extends AbstractMusicBrowserActivity<Favori
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mTitle = "favorite";
-		setContentView(R.layout.favorite_list);
+		setContentView(R.layout.default_browser_list);
 		super.init();
 	}
 	

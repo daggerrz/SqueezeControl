@@ -19,7 +19,7 @@ public class PlaylistBrowserActivity extends AbstractMusicBrowserActivity<Playli
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mTitle = "playlist";
-		setContentView(R.layout.playlist_list);
+		setContentView(R.layout.default_browser_list);
 		super.init();
 	}
 	
