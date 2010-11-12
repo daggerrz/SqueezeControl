@@ -13,24 +13,26 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.Toast;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.squeezecontrol.download.MusicDownloadService;
 import com.squeezecontrol.io.MusicBrowser;
 import com.squeezecontrol.io.SqueezePlayer;
 import com.squeezecontrol.model.Browsable;
+import com.squeezecontrol.util.VolumeKeyHandler;
 import com.squeezecontrol.view.BrowseableAdapter;
 import com.squeezecontrol.view.NowPlayingView;
 
@@ -71,6 +73,8 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 
 	private InputMethodManager mInputMethodManager;
 
+	private NowPlayingView mNowPlayingView;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -85,6 +89,17 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 	@Override
 	protected void onStop() {
 		super.onStop();
+	}
+
+	protected void onServiceBound(SqueezeService service) {
+		mNowPlayingView = new NowPlayingView(this, service);
+		mNowPlayingView.startListening();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mNowPlayingView.stopListening();
 	}
 
 	protected abstract BrowseableAdapter<T> createListAdapter();
@@ -137,11 +152,6 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 		getListAdapter().setFilter(mFilter);
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-
 	private void setQueryString(String query) {
 		synchronized (mLoaderThread) {
 			mQueryVersion++;
@@ -159,12 +169,7 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 		// page
 		mLoaderThread.interrupt();
 
-	}
-
-	protected void onServiceBound(SqueezeService service) {
-		new NowPlayingView(this, service);
-	}
-
+	}	
 	protected void onInitialResultLoaded(BrowseLoadResult<T> result) {
 
 	}
@@ -439,6 +444,12 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
 		}
 		return true;
 	}
+	
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		if (VolumeKeyHandler.dispatchKeyEvent(event)) return true;
+		else return super.dispatchKeyEvent(event);
+	}	
 
 	class PageLoadCommand {
 		int pageNumber;

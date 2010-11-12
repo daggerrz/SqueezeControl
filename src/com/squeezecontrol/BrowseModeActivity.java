@@ -2,10 +2,13 @@ package com.squeezecontrol;
 
 import java.util.ArrayList;
 
+import com.squeezecontrol.util.VolumeKeyHandler;
+
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,6 +105,12 @@ public class BrowseModeActivity extends ListActivity {
 		}
 		if (intent != null)
 			startActivity(intent);
+	}
+	
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		if (VolumeKeyHandler.dispatchKeyEvent(event)) return true;
+		else return super.dispatchKeyEvent(event);
 	}
 	
 	class Action {

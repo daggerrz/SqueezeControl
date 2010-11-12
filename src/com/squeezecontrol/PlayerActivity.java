@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Layout;
 import android.text.TextUtils.TruncateAt;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -32,9 +33,10 @@ import android.widget.Toast;
 import com.squeezecontrol.io.SqueezeBroker;
 import com.squeezecontrol.io.SqueezeEventListener;
 import com.squeezecontrol.io.SqueezePlayer;
-import com.squeezecontrol.io.SqueezePlayerListener;
 import com.squeezecontrol.io.SqueezePlayer.ShuffleMode;
+import com.squeezecontrol.io.SqueezePlayerListener;
 import com.squeezecontrol.model.Song;
+import com.squeezecontrol.util.VolumeKeyHandler;
 import com.squeezecontrol.view.PlayerControlsView;
 
 public class PlayerActivity extends Activity implements View.OnTouchListener,
@@ -83,11 +85,10 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 		super.onCreate(savedInstanceState);
 
 		if (!Settings.isConfigured(this)) {
-			Toast
-					.makeText(
-							this,
-							"Please start by configuring your SqueezeCenter Server settings!",
-							Toast.LENGTH_LONG).show();
+			Toast.makeText(
+					this,
+					"Please start by configuring your SqueezeCenter Server settings!",
+					Toast.LENGTH_LONG).show();
 			startActivity(new Intent(this, SettingsActivity.class));
 			finish();
 		} else {
@@ -330,14 +331,15 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// menu.add(0, MENU_LIBRARY, 0, "Library");
-		mMenuFavorite = menu.add(0, MENU_ADD_FAVORITE, 0, "Mark as favorite").setIcon(
-				R.drawable.ic_menu_favorite);
+		mMenuFavorite = menu.add(0, MENU_ADD_FAVORITE, 0, "Mark as favorite")
+				.setIcon(R.drawable.ic_menu_favorite);
 
-		mMenuShuffle = menu.add(0, MENU_SHUFFLE, 0, "Shuffle mode").setIcon(R.drawable.ic_menu_shuffle);
+		mMenuShuffle = menu.add(0, MENU_SHUFFLE, 0, "Shuffle mode").setIcon(
+				R.drawable.ic_menu_shuffle);
 
 		mMenuDownload = menu.add(0, MENU_DOWNLOAD_SONG, 0, "Save to phone")
-		.setIcon(android.R.drawable.ic_menu_save);
-		
+				.setIcon(android.R.drawable.ic_menu_save);
+
 		menu.add(0, MENU_PLAYERS, 0, "Select player").setIcon(
 				android.R.drawable.ic_menu_agenda);
 		mMenuPower = menu.add(0, MENU_POWER_ON_OFF, 0, "Power on / off")
@@ -349,22 +351,23 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		
+
 		boolean hasPlayer = mPlayer != null;
 		mMenuPower.setEnabled(hasPlayer);
 		mMenuPower.setEnabled(hasPlayer);
 		mMenuShuffle.setEnabled(hasPlayer);
-		
-		boolean hasSong = hasPlayer && mCurrentSong != null && mCurrentSong != Song.EMPTY;
+
+		boolean hasSong = hasPlayer && mCurrentSong != null
+				&& mCurrentSong != Song.EMPTY;
 		mMenuDownload.setEnabled(hasSong);
 		mMenuFavorite.setEnabled(hasSong);
-		
+
 		if (hasPlayer) {
 			if (mPlayer.isPowerOn())
 				mMenuPower.setTitle("Power off");
 			else
 				mMenuPower.setTitle("Power on");
-			
+
 		}
 
 		return super.onPrepareOptionsMenu(menu);
@@ -393,10 +396,9 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 			try {
 				Song song = mPlayer.getCurrentSong();
 				mBroker.getMusicBrowser().flagAsFavorite(song);
-				Toast
-						.makeText(PlayerActivity.this,
-								"Added as favorite:\n" + song.title,
-								Toast.LENGTH_SHORT).show();
+				Toast.makeText(PlayerActivity.this,
+						"Added as favorite:\n" + song.title, Toast.LENGTH_SHORT)
+						.show();
 			} catch (IOException e) {
 			}
 			return true;
@@ -415,25 +417,34 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 	}
 
 	private void selectShuffleMode() {
-		final CharSequence[] items = {"None", "By song", "By album" };
+		final CharSequence[] items = { "None", "By song", "By album" };
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Shuffle mode");
 		ShuffleMode currentMode = mPlayer.getShuffleMode();
-		builder.setSingleChoiceItems(items, currentMode == null ? -1 : currentMode.ordinal(), new DialogInterface.OnClickListener() {
-		    public void onClick(DialogInterface dialog, int item) {
-		        ShuffleMode m = null;
-		        switch (item) {
-		        case 0: m = ShuffleMode.NONE; break;
-		        case 1: m = ShuffleMode.BY_SONG; break;
-		        case 2: m = ShuffleMode.BY_ALBUM; break;
-		        }
-		        mPlayer.setShuffleMode(m);
-		        dialog.dismiss();
-		        Toast.makeText(getApplicationContext(), "Shuffle mode: " + items[item], Toast.LENGTH_SHORT).show();
-		    }
+		builder.setSingleChoiceItems(items, currentMode == null ? -1
+				: currentMode.ordinal(), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int item) {
+				ShuffleMode m = null;
+				switch (item) {
+				case 0:
+					m = ShuffleMode.NONE;
+					break;
+				case 1:
+					m = ShuffleMode.BY_SONG;
+					break;
+				case 2:
+					m = ShuffleMode.BY_ALBUM;
+					break;
+				}
+				mPlayer.setShuffleMode(m);
+				dialog.dismiss();
+				Toast.makeText(getApplicationContext(),
+						"Shuffle mode: " + items[item], Toast.LENGTH_SHORT)
+						.show();
+			}
 		});
-		AlertDialog dlg = builder.create();		
+		AlertDialog dlg = builder.create();
 		dlg.show();
 	}
 
@@ -584,18 +595,26 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 
 	public boolean onLongClick(View view) {
 		Song currentSong = mCurrentSong;
-		if (view.equals(mArtistName.getParent()) && currentSong != null && currentSong.artistId != null) {
+		if (view.equals(mArtistName.getParent()) && currentSong != null
+				&& currentSong.artistId != null) {
 			Intent intent = new Intent(this, AlbumBrowserActivity.class);
-			intent.putExtra(AlbumBrowserActivity.EXTRA_ARTIST_ID, mPlayer
-					.getCurrentSong().artistId);
+			intent.putExtra(AlbumBrowserActivity.EXTRA_ARTIST_ID,
+					mPlayer.getCurrentSong().artistId);
 			startActivity(intent);
-		} else if (view.equals(mAlbumName.getParent()) && currentSong != null && currentSong.albumId!= null) {
+		} else if (view.equals(mAlbumName.getParent()) && currentSong != null
+				&& currentSong.albumId != null) {
 			Intent intent = new Intent(this, SongBrowserActivity.class);
-			intent.putExtra(SongBrowserActivity.EXTRA_ALBUM_ID, mPlayer
-					.getCurrentSong().albumId);
+			intent.putExtra(SongBrowserActivity.EXTRA_ALBUM_ID,
+					mPlayer.getCurrentSong().albumId);
 			startActivity(intent);
 		}
 		return true;
+	}
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		if (VolumeKeyHandler.dispatchKeyEvent(event)) return true;
+		else return super.dispatchKeyEvent(event);
 	}
 
 	private void showChangeLog() {

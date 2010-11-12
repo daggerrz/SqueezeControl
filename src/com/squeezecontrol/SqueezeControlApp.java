@@ -1,6 +1,8 @@
 package com.squeezecontrol;
 
 import android.app.Application;
+import android.content.Context;
+import android.media.AudioManager;
 
 public class SqueezeControlApp extends Application {
 

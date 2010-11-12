@@ -3,12 +3,14 @@ package com.squeezecontrol.view;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.squeezecontrol.PlayerActivity;
 import com.squeezecontrol.R;
 import com.squeezecontrol.SqueezeService;
+import com.squeezecontrol.io.SqueezePlayer;
 import com.squeezecontrol.io.SqueezePlayerListener;
 import com.squeezecontrol.model.Song;
 
@@ -24,6 +26,7 @@ public class NowPlayingView implements SqueezePlayerListener {
 	private View mNowPlayingView;
 	private TextView mTitle;
 	private TextView mArtist;
+	private SqueezePlayer mPlayer;
 
 	public NowPlayingView(Activity a, SqueezeService service) {
 		mService = service;
@@ -40,12 +43,21 @@ public class NowPlayingView implements SqueezePlayerListener {
 			}
 		});
 
-		if (service.getPlayer() != null) {
-			service.getPlayer().addListener(this);
-			setSong(service.getPlayer().getCurrentSong());
+	}
+	
+	public void startListening() {
+		if (mService.getPlayer() != null) {
+			mPlayer = mService.getPlayer();
+			mPlayer.addListener(this);
+			setSong(mPlayer.getCurrentSong());
 		}
+
 	}
 
+	public void stopListening() {
+		if (mPlayer != null) mPlayer.removeListener(this);
+	}
+	
 	protected void setSong(Song newSong) {
 		if (mNowPlayingView == null) {
 			return;
@@ -76,5 +88,7 @@ public class NowPlayingView implements SqueezePlayerListener {
 		// TODO Auto-generated method stub
 
 	}
+
+
 
 }
