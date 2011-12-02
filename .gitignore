@@ -1,0 +1,6 @@
+.DS_Store
+gen
+out
+.idea
+SqueezeControl.iml
+default.properties
