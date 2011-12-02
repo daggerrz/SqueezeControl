@@ -1,33 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:padding="3pt"
-    >
-	<ImageView
-		android:id="@+id/icon"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_weight="0"
-	    android:textColor="#fff"
-	    android:src="@drawable/artists"
-	    android:layout_marginRight="5pt"		    
-		android:scaleType="matrix"
-	    android:minHeight="50dip"
-	    android:maxHeight="50dip"
-	/>
+<!--
+  ~ This program is free software; you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License version 3 as
+  ~ published by the Free Software Foundation.
+  -->
 
-	<TextView 
-		android:id="@+id/action_name"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_weight="1"
-	    android:text="Text here"
-	    android:textColor="#fff"
-		android:textAppearance="?android:attr/textAppearanceLarge"
-		android:linksClickable="false"
-		android:textColorLink="#eee"
-	/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:padding="3pt"
+        >
+    <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:textColor="#fff"
+            android:src="@drawable/artists"
+            android:layout_marginRight="5pt"
+            android:scaleType="matrix"
+            android:minHeight="50dip"
+            android:maxHeight="50dip"
+            />
+
+    <TextView
+            android:id="@+id/action_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Text here"
+            android:textColor="#fff"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:linksClickable="false"
+            android:textColorLink="#eee"
+            />
 
 </LinearLayout>

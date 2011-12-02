@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ This program is free software; you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License version 3 as
+  ~ published by the Free Software Foundation.
+  -->
+
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
             android:title="Squeezecenter Server">
-            
+
         <EditTextPreference
                 android:key="server_address"
                 android:title="Squeezecenter Address"
@@ -30,19 +36,19 @@
                 android:defaultValue=""
                 android:password="true"
                 />
-		<Preference 
-			android:key="preferences_connect"
-			android:title="Connect and continue"
-			/>
-	</PreferenceCategory>
-	
-	<PreferenceCategory
+        <Preference
+                android:key="preferences_connect"
+                android:title="Connect and continue"
+                />
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="Advanced Settings">
         <EditTextPreference
                 android:key="cli_port"
                 android:title="CLI Port"
                 android:summary="Command Line Interface Port (usually 9090)"
-                android:dialogTitle="CLI Port" 
+                android:dialogTitle="CLI Port"
                 android:defaultValue="9090"
                 android:numeric="integer"
                 />
@@ -51,23 +57,23 @@
                 android:key="http_port"
                 android:title="HTTP Port"
                 android:summary="HTTP Port (usually 9000)"
-                android:dialogTitle="HTTP Port" 
+                android:dialogTitle="HTTP Port"
                 android:defaultValue="9000"
                 android:numeric="integer"
                 />
-            
+
     </PreferenceCategory>
 
     <PreferenceCategory
             android:title="Diagnostics">
-		<Preference 
-			android:key="test_cli"
-			android:title="Test CLI port"
-			/>
-		<Preference 
-			android:key="test_http"
-			android:title="Test HTTP port"
-			/>
-	</PreferenceCategory>                    
+        <Preference
+                android:key="test_cli"
+                android:title="Test CLI port"
+                />
+        <Preference
+                android:key="test_http"
+                android:title="Test HTTP port"
+                />
+    </PreferenceCategory>
 
 </PreferenceScreen>

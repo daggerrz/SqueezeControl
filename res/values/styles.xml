@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ This program is free software; you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License version 3 as
+  ~ published by the Free Software Foundation.
+  -->
+
 <resources>
     <!-- Base application theme is the default theme. -->
     <style name="Theme" parent="android:Theme">
@@ -9,11 +15,11 @@
     <style name="Heading">
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:orientation">horizontal</item>
-       	<item name="android:layout_width">fill_parent</item>
-       	<item name="android:layout_height">wrap_content</item>
-       	<item name="android:padding">3pt</item>
-       	<item name="android:textColor">#000</item>
-       	<item name="android:background">#eee</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">3pt</item>
+        <item name="android:textColor">#000</item>
+        <item name="android:background">#eee</item>
     </style>
 
 </resources>

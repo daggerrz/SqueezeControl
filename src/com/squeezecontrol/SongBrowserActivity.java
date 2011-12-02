@@ -1,113 +1,111 @@
-package com.squeezecontrol;
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ */
 
-import java.io.IOException;
-import java.util.ArrayList;
+package com.squeezecontrol;
 
 import android.os.Bundle;
 import android.text.util.Linkify;
-import android.view.ContextMenu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-
 import com.squeezecontrol.model.Song;
 import com.squeezecontrol.view.BrowseableAdapter;
 
+import java.io.IOException;
+
 public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
 
-	public static String EXTRA_ALBUM_ID = "album_id";
-	public static String EXTRA_ALBUM_NAME = "album_name";
-	public static String EXTRA_ARTIST_ID = "artist_id";
+    public static String EXTRA_ALBUM_ID = "album_id";
+    public static String EXTRA_ALBUM_NAME = "album_name";
+    public static String EXTRA_ARTIST_ID = "artist_id";
 
-	private String mAlbumId = null;
-	private String mArtistId = null;
+    private String mAlbumId = null;
+    private String mArtistId = null;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mTitle = "song";
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mTitle = "song";
 
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			mAlbumId = extras.getString(EXTRA_ALBUM_ID);
-			mArtistId = extras.getString(EXTRA_ARTIST_ID);
-		}
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            mAlbumId = extras.getString(EXTRA_ALBUM_ID);
+            mArtistId = extras.getString(EXTRA_ARTIST_ID);
+        }
 
-		setContentView(R.layout.default_browser_list);
+        setContentView(R.layout.default_browser_list);
 
-		super.init();
-	}
+        super.init();
+    }
 
-	@Override
-	protected BrowseableAdapter<Song> createListAdapter() {
-		return new BrowseableAdapter<Song>(this, R.layout.song_list_item) {
-			@Override
-			protected void bindView(int position, View view) {
-				Song s = getItem(position);
+    @Override
+    protected BrowseableAdapter<Song> createListAdapter() {
+        return new BrowseableAdapter<Song>(this, R.layout.song_list_item) {
+            @Override
+            protected void bindView(int position, View view) {
+                Song s = getItem(position);
 
-				TextView songName = (TextView) view.findViewById(R.id.name);
-				TextView artistName = (TextView) view
-						.findViewById(R.id.artist_name);
-				TextView albumName = (TextView) view
-						.findViewById(R.id.album_name);
+                TextView songName = (TextView) view.findViewById(R.id.name);
+                TextView artistName = (TextView) view
+                        .findViewById(R.id.artist_name);
+                TextView albumName = (TextView) view
+                        .findViewById(R.id.album_name);
 
-				if (s == null) {
-					songName.setText(R.string.loading_progress);
-					artistName.setText("");
-					albumName.setText("");
-				} else {
-					songName.setText(s.getName());
-					if (getQueryPattern() != null) {
-						Linkify.addLinks(songName, getQueryPattern(), null);
-					}
-					artistName.setText(s.artist);
-					albumName.setText(s.album);
-				}
+                if (s == null) {
+                    songName.setText(R.string.loading_progress);
+                    artistName.setText("");
+                    albumName.setText("");
+                } else {
+                    songName.setText(s.getName());
+                    if (getQueryPattern() != null) {
+                        Linkify.addLinks(songName, getQueryPattern(), null);
+                    }
+                    artistName.setText(s.artist);
+                    albumName.setText(s.album);
+                }
 
-			}
-		};
-	}
+            }
+        };
+    }
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (position < 0)
-			return;
-		Song item = (Song) l.getItemAtPosition(position);
-		if (item == null)
-			return;
-		addToPlaylist(item);
-	}
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        if (position < 0)
+            return;
+        Song item = (Song) l.getItemAtPosition(position);
+        if (item == null)
+            return;
+        addToPlaylist(item);
+    }
 
-	@Override
-	protected void addToPlaylist(Song selectedItem) {
-		getPlayer().addToPlaylist(selectedItem);
-		PlayerToasts.addedToPlayList(this, selectedItem);
-	}
+    @Override
+    protected void addToPlaylist(Song selectedItem) {
+        getPlayer().addToPlaylist(selectedItem);
+        PlayerToasts.addedToPlayList(this, selectedItem);
+    }
 
-	@Override
-	protected void download(Song selectedItem) {
-		getDownloadService().queueSongForDownload(selectedItem);
-	}
+    @Override
+    protected void download(Song selectedItem) {
+        getDownloadService().queueSongForDownload(selectedItem);
+    }
 
-	protected int getMenuResource() {
-		return R.menu.browse_menu_with_download;
-	}
+    protected int getMenuResource() {
+        return R.menu.browse_menu_with_download;
+    }
 
-	@Override
-	protected void play(Song selectedItem, int index) {
-		getPlayer().playNow(selectedItem);
-	}
+    @Override
+    protected void play(Song selectedItem, int index) {
+        getPlayer().playNow(selectedItem);
+    }
 
-	@Override
-	protected BrowseLoadResult<Song> loadItems(int startIndex, int count)
-			throws IOException {
-		return getMusicBrowser().getSongs(getQueryString(), mAlbumId,
-				mArtistId, startIndex, count);
-	}
+    @Override
+    protected BrowseLoadResult<Song> loadItems(int startIndex, int count)
+            throws IOException {
+        return getMusicBrowser().getSongs(getQueryString(), mAlbumId,
+                mArtistId, startIndex, count);
+    }
 
 }

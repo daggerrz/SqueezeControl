@@ -1,8 +1,16 @@
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ */
+
 package com.squeezecontrol.io;
+
+import com.squeezecontrol.io.FutureResponse.ResponseCallback;
+import com.squeezecontrol.io.SqueezeConnection.InvalidCredentialsException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,340 +19,334 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import android.util.Log;
-
-import com.squeezecontrol.io.FutureResponse.ResponseCallback;
-import com.squeezecontrol.io.SqueezeConnection.InvalidCredentialsException;
-
 /**
  * Manages a {@link SqueezeConnection} and read / write queues and routes
  * notifications to the players.
- * 
- * @author liodden
- * 
+ *
+ * @author daggerrz
  */
 public class SqueezeBroker {
 
-	private static final String TAG = "SqueezeBroker";
-	private static final boolean DEBUG = false;
-	private static final String REQUEST_TAG = "_SC_REQ_";
+    private static final String TAG = "SqueezeBroker";
+    private static final boolean DEBUG = false;
+    private static final String REQUEST_TAG = "_SC_REQ_";
 
-	private SqueezeConnection mConnection;
-	private CopyOnWriteArraySet<SqueezeEventListener> mEventListeners = new CopyOnWriteArraySet<SqueezeEventListener>();
+    private SqueezeConnection mConnection;
+    private CopyOnWriteArraySet<SqueezeEventListener> mEventListeners = new CopyOnWriteArraySet<SqueezeEventListener>();
 
-	private ReaderThread readerThread;
-	private WriterThread writerThread;
+    private ReaderThread readerThread;
+    private WriterThread writerThread;
 
-	private Map<String, SqueezePlayer> players = new ConcurrentHashMap<String, SqueezePlayer>();
-	private Map<String, FutureResponse<SqueezeCommand>> responseMap = new ConcurrentHashMap<String, FutureResponse<SqueezeCommand>>();
+    private Map<String, SqueezePlayer> players = new ConcurrentHashMap<String, SqueezePlayer>();
+    private Map<String, FutureResponse<SqueezeCommand>> responseMap = new ConcurrentHashMap<String, FutureResponse<SqueezeCommand>>();
 
-	private ArrayList<ResponseCallback<SqueezeCommand>> mPrefixCallbacks = new ArrayList<ResponseCallback<SqueezeCommand>>();
+    private ArrayList<ResponseCallback<SqueezeCommand>> mPrefixCallbacks = new ArrayList<ResponseCallback<SqueezeCommand>>();
 
-	private AtomicInteger requestIdGenerator = new AtomicInteger();
-	private int mCliPort;
-	private String mHost;
-	private MusicBrowser mMusicBrowser;
-	private String mUsername;
-	private String mPassword;
+    private AtomicInteger requestIdGenerator = new AtomicInteger();
+    private int mCliPort;
+    private String mHost;
+    private MusicBrowser mMusicBrowser;
+    private String mUsername;
+    private String mPassword;
 
-	public SqueezeBroker(String host, int cliPort, String username,
-			String password, SqueezeEventListener listener) {
-		mHost = host;
-		mCliPort = cliPort;
-		mUsername = username;
-		mPassword = password;
-		mEventListeners.add(listener);
-		mMusicBrowser = new MusicBrowser(this);
-	}
+    public SqueezeBroker(String host, int cliPort, String username,
+                         String password, SqueezeEventListener listener) {
+        mHost = host;
+        mCliPort = cliPort;
+        mUsername = username;
+        mPassword = password;
+        mEventListeners.add(listener);
+        mMusicBrowser = new MusicBrowser(this);
+    }
 
-	public int getPort() {
-		return mCliPort;
-	}
+    public int getPort() {
+        return mCliPort;
+    }
 
-	public String getHost() {
-		return mHost;
-	}
+    public String getHost() {
+        return mHost;
+    }
 
-	public SqueezePlayer getPlayer(String id) {
-		SqueezePlayer p = players.get(id);
-		if (p == null) {
-			p = new SqueezePlayer(id, this);
-			players.put(id, p);
-			try {
-				p.requestPlayerState();
-			} catch (IOException e) {
-			}
-		}
-		return p;
-	}
+    public SqueezePlayer getPlayer(String id) {
+        SqueezePlayer p = players.get(id);
+        if (p == null) {
+            p = new SqueezePlayer(id, this);
+            players.put(id, p);
+            try {
+                p.requestPlayerState();
+            } catch (IOException e) {
+            }
+        }
+        return p;
+    }
 
-	public synchronized void connect() {
-		if (mConnection != null)
-			return;
-		mConnection = new SqueezeConnection(mHost, mCliPort, mUsername,
-				mPassword);
-		try {
-			mConnection.open();
-			readerThread = new ReaderThread();
-			readerThread.start();
-			writerThread = new WriterThread();
-			writerThread.start();
-			for (SqueezeEventListener l : mEventListeners)
-				l.onConnect(this);
-			postCommand("listen 1");
-			for (SqueezePlayer p : players.values())
-				p.requestPlayerState();
-		} catch (IOException e) {
-			disconnect();
-			for (SqueezeEventListener l : mEventListeners)
-				l.onConnectionError(this, e);
-		}
-	}
+    public synchronized void connect() {
+        if (mConnection != null)
+            return;
+        mConnection = new SqueezeConnection(mHost, mCliPort, mUsername,
+                mPassword);
+        try {
+            mConnection.open();
+            readerThread = new ReaderThread();
+            readerThread.start();
+            writerThread = new WriterThread();
+            writerThread.start();
+            for (SqueezeEventListener l : mEventListeners)
+                l.onConnect(this);
+            postCommand("listen 1");
+            for (SqueezePlayer p : players.values())
+                p.requestPlayerState();
+        } catch (IOException e) {
+            disconnect();
+            for (SqueezeEventListener l : mEventListeners)
+                l.onConnectionError(this, e);
+        }
+    }
 
-	public synchronized void disconnect() {
-		if (mConnection == null)
-			return;
+    public synchronized void disconnect() {
+        if (mConnection == null)
+            return;
 
-		if (readerThread != null) {
-			readerThread.cancel();
-			readerThread = null;
-		}
-		if (writerThread != null) {
-			writerThread.cancel();
-			writerThread = null;
-		}
-		final SqueezeConnection conn = mConnection;
+        if (readerThread != null) {
+            readerThread.cancel();
+            readerThread = null;
+        }
+        if (writerThread != null) {
+            writerThread.cancel();
+            writerThread = null;
+        }
+        final SqueezeConnection conn = mConnection;
 
-		// A bug in InputStream.close causes it to hang for a long time, so
-		// disconnect in a separate thread.
-		new Thread("Connection closer thread") {
-			@Override
-			public void run() {
-				conn.close();
-			}
-		}.start();
-		mConnection = null;
-		for (SqueezeEventListener l : mEventListeners)
-			l.onDisconnect(this);
-	}
+        // A bug in InputStream.close causes it to hang for a long time, so
+        // disconnect in a separate thread.
+        new Thread("Connection closer thread") {
+            @Override
+            public void run() {
+                conn.close();
+            }
+        }.start();
+        mConnection = null;
+        for (SqueezeEventListener l : mEventListeners)
+            l.onDisconnect(this);
+    }
 
-	public void postCommand(String command) {
-		if (writerThread != null)
-			writerThread.enqueue(command);
-	}
+    public void postCommand(String command) {
+        if (writerThread != null)
+            writerThread.enqueue(command);
+    }
 
-	public void postCommand(String command,
-			ResponseCallback<SqueezeCommand> callback) {
-		synchronized (mPrefixCallbacks) {
-			mPrefixCallbacks.add(callback);
-		}
-		if (writerThread != null)
-			writerThread.enqueue(command);
-	}
+    public void postCommand(String command,
+                            ResponseCallback<SqueezeCommand> callback) {
+        synchronized (mPrefixCallbacks) {
+            mPrefixCallbacks.add(callback);
+        }
+        if (writerThread != null)
+            writerThread.enqueue(command);
+    }
 
-	public SqueezeCommand sendRequest(String command) throws IOException {
-		FutureResponse<SqueezeCommand> respHolder = sendRequest(command, null);
-		try {
-			return respHolder.getResponse();
-		} catch (InterruptedException e) {
-			throw new IOException("Interrupted while waiting for response");
-		}
-	}
+    public SqueezeCommand sendRequest(String command) throws IOException {
+        FutureResponse<SqueezeCommand> respHolder = sendRequest(command, null);
+        try {
+            return respHolder.getResponse();
+        } catch (InterruptedException e) {
+            throw new IOException("Interrupted while waiting for response");
+        }
+    }
 
-	public FutureResponse<SqueezeCommand> sendRequest(String command,
-			ResponseCallback<SqueezeCommand> callback) {
-		String reqId = String.valueOf(requestIdGenerator.addAndGet(1));
-		
-		// If more requests are sent simultaneously, SC will ignore all but the first.
-		// We have to wait...
-		while (responseMap.size() > 0) {
-			Iterator<String> it = responseMap.keySet().iterator();
-			if (it.hasNext()) {
-				String key = it.next();
-				FutureResponse<SqueezeCommand> f = responseMap.get(key);
-				if (f != null)
-					try {
-						f.getResponse();
-					} catch (InterruptedException e) {
-					}
-			}
-		}
-		
-		FutureResponse<SqueezeCommand> respHolder = new FutureResponse<SqueezeCommand>(
-				callback);
-		responseMap.put(reqId, respHolder);
-		postCommand(command + " " + REQUEST_TAG + reqId);
-		return respHolder;
-	}
+    public FutureResponse<SqueezeCommand> sendRequest(String command,
+                                                      ResponseCallback<SqueezeCommand> callback) {
+        String reqId = String.valueOf(requestIdGenerator.addAndGet(1));
 
-	private void handleResponse(SqueezeCommand command, String requestIdString) {
-		String reqId = requestIdString.substring(REQUEST_TAG.length());
-		FutureResponse<SqueezeCommand> respHolder = responseMap.remove(reqId);
-		// if (DEBUG)
-		// Log.d(TAG, "Response for " + reqId);
-		if (respHolder != null) {
-			respHolder.setResponse(command);
-		}
-		
-	}
+        // If more requests are sent simultaneously, SC will ignore all but the first.
+        // We have to wait...
+        while (responseMap.size() > 0) {
+            Iterator<String> it = responseMap.keySet().iterator();
+            if (it.hasNext()) {
+                String key = it.next();
+                FutureResponse<SqueezeCommand> f = responseMap.get(key);
+                if (f != null)
+                    try {
+                        f.getResponse();
+                    } catch (InterruptedException e) {
+                    }
+            }
+        }
 
-	public boolean isConnected() {
-		return mConnection != null && mConnection.isConnected();
-	}
+        FutureResponse<SqueezeCommand> respHolder = new FutureResponse<SqueezeCommand>(
+                callback);
+        responseMap.put(reqId, respHolder);
+        postCommand(command + " " + REQUEST_TAG + reqId);
+        return respHolder;
+    }
 
-	public ArrayList<SqueezePlayer> getPlayers() throws IOException {
-		SqueezeCommand response = sendRequest("players 0 100");
-		ArrayList<SqueezePlayer> players = new ArrayList<SqueezePlayer>();
-		ArrayList<ArrayList<String>> rows = response
-				.splitParameters("playerindex%3A");
-		for (ArrayList<String> pArray : rows) {
-			Map<String, String> pMap = SqueezeCommand
-					.splitToParameterMap(pArray);
-			SqueezePlayer p = getPlayer(pMap.get("playerid"));
-			p.name = pMap.get("name");
-			p.ipAddress = pMap.get("ip");
-			p.model = pMap.get("model");
-			players.add(p);
-		}
-		return players;
-	}
+    private void handleResponse(SqueezeCommand command, String requestIdString) {
+        String reqId = requestIdString.substring(REQUEST_TAG.length());
+        FutureResponse<SqueezeCommand> respHolder = responseMap.remove(reqId);
+        // if (DEBUG)
+        // Log.d(TAG, "Response for " + reqId);
+        if (respHolder != null) {
+            respHolder.setResponse(command);
+        }
 
-	class WriterThread extends Thread {
-		private boolean cancelled = false;
-		LinkedBlockingQueue<String> commandQueue = new LinkedBlockingQueue<String>();
+    }
 
-		public WriterThread() {
-			setName("Slim Writer Thread");
-		}
+    public boolean isConnected() {
+        return mConnection != null && mConnection.isConnected();
+    }
 
-		void enqueue(String command) {
-			commandQueue.add(command);
-		}
+    public ArrayList<SqueezePlayer> getPlayers() throws IOException {
+        SqueezeCommand response = sendRequest("players 0 100");
+        ArrayList<SqueezePlayer> players = new ArrayList<SqueezePlayer>();
+        ArrayList<ArrayList<String>> rows = response
+                .splitParameters("playerindex%3A");
+        for (ArrayList<String> pArray : rows) {
+            Map<String, String> pMap = SqueezeCommand
+                    .splitToParameterMap(pArray);
+            SqueezePlayer p = getPlayer(pMap.get("playerid"));
+            p.name = pMap.get("name");
+            p.ipAddress = pMap.get("ip");
+            p.model = pMap.get("model");
+            players.add(p);
+        }
+        return players;
+    }
 
-		void cancel() {
-			cancelled = true;
-			interrupt();
-		}
+    class WriterThread extends Thread {
+        private boolean cancelled = false;
+        LinkedBlockingQueue<String> commandQueue = new LinkedBlockingQueue<String>();
 
-		@Override
-		public void run() {
-			while (!cancelled) {
-				try {
-					String command = commandQueue.poll(1, TimeUnit.SECONDS);
-					if (command != null)
-						mConnection.sendCommand(command);
-				} catch (InvalidCredentialsException e) {
+        public WriterThread() {
+            setName("Slim Writer Thread");
+        }
 
-				} catch (IOException e) {
-					if (!cancelled) {
-						// Log.i(TAG, "Error during send: " + e.getMessage());
-						// Let the reader thread disconnect
-					}
-					break;
-				} catch (InterruptedException e) {
-				}
-			}
-		}
-	}
+        void enqueue(String command) {
+            commandQueue.add(command);
+        }
 
-	class ReaderThread extends Thread {
-		private boolean cancelled = false;
+        void cancel() {
+            cancelled = true;
+            interrupt();
+        }
 
-		public ReaderThread() {
-			setName("Slim Reader Thread");
-		}
+        @Override
+        public void run() {
+            while (!cancelled) {
+                try {
+                    String command = commandQueue.poll(1, TimeUnit.SECONDS);
+                    if (command != null)
+                        mConnection.sendCommand(command);
+                } catch (InvalidCredentialsException e) {
 
-		void cancel() {
-			cancelled = true;
-			interrupt();
-		}
+                } catch (IOException e) {
+                    if (!cancelled) {
+                        // Log.i(TAG, "Error during send: " + e.getMessage());
+                        // Let the reader thread disconnect
+                    }
+                    break;
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    }
 
-		@Override
-		public void run() {
-			while (!cancelled) {
-				String commandString;
-				try {
-					commandString = mConnection.readCommand();
-					// if (DEBUG)
-					// Log.d(TAG, "Recv: " + commandString);
-					SqueezeCommand command = CommandParser.parse(commandString);
-					if (command != null) {
-						// if (DEBUG)
-						// Log.d(TAG, "Parsed command successfully");
+    class ReaderThread extends Thread {
+        private boolean cancelled = false;
 
-						boolean handled = false;
-						handled = executePrefixCallbacks(commandString, command);
-						if (!handled)
-							handled = executeResponseHolders(command);
-						if (!handled)
-							executePlayerNotification(command);
+        public ReaderThread() {
+            setName("Slim Reader Thread");
+        }
 
-					}
-				} catch (SqueezeConnection.InvalidCredentialsException e) {
-					for (SqueezeEventListener l : mEventListeners)
-						l.onConnectionError(SqueezeBroker.this, e);
-					disconnect();
-				} catch (IOException e) {
-					// Are we disconnected
-					if (!cancelled) {
-						// Log.i(TAG, "Error during read: " + e.getMessage());
-						disconnect();
-					}
-					break;
-				}
-			}
-		}
+        void cancel() {
+            cancelled = true;
+            interrupt();
+        }
 
-		private final boolean executePlayerNotification(SqueezeCommand command) {
-			if (players.containsKey(command.getPlayerId())) {
-				getPlayer(command.getPlayerId()).handleNotification(command);
-				return true;
-			} else
-				return false;
-		}
+        @Override
+        public void run() {
+            while (!cancelled) {
+                String commandString;
+                try {
+                    commandString = mConnection.readCommand();
+                    // if (DEBUG)
+                    // Log.d(TAG, "Recv: " + commandString);
+                    SqueezeCommand command = CommandParser.parse(commandString);
+                    if (command != null) {
+                        // if (DEBUG)
+                        // Log.d(TAG, "Parsed command successfully");
 
-		private final boolean executeResponseHolders(SqueezeCommand command) {
-			// Request response?
-			boolean response = false;
-			for (String p : command.getParameters()) {
-				if (p.startsWith(REQUEST_TAG)) {
-					handleResponse(command, p);
-				}
-			}
-			return response;
-		}
+                        boolean handled = false;
+                        handled = executePrefixCallbacks(commandString, command);
+                        if (!handled)
+                            handled = executeResponseHolders(command);
+                        if (!handled)
+                            executePlayerNotification(command);
 
-		@SuppressWarnings("unchecked")
-		private final boolean executePrefixCallbacks(String commandString,
-				SqueezeCommand response) {
+                    }
+                } catch (SqueezeConnection.InvalidCredentialsException e) {
+                    for (SqueezeEventListener l : mEventListeners)
+                        l.onConnectionError(SqueezeBroker.this, e);
+                    disconnect();
+                } catch (IOException e) {
+                    // Are we disconnected
+                    if (!cancelled) {
+                        // Log.i(TAG, "Error during read: " + e.getMessage());
+                        disconnect();
+                    }
+                    break;
+                }
+            }
+        }
 
-			ArrayList<FutureResponse.ResponseCallback<SqueezeCommand>> callbacks = new ArrayList<ResponseCallback<SqueezeCommand>>();
-			synchronized (mPrefixCallbacks) {
-				for (Iterator<ResponseCallback<SqueezeCommand>> iter = mPrefixCallbacks
-						.iterator(); iter.hasNext();) {
-					ResponseCallback<SqueezeCommand> cb = iter.next();
-					if (commandString.startsWith(cb.getCommandPrefix())) {
-						callbacks.add(cb);
-						iter.remove();
-					}
-				}
-			}
-			for (ResponseCallback callback : callbacks) {
-				callback.handleResponse(response);
-			}
-			return callbacks.size() > 0;
-		}
-	}
+        private final boolean executePlayerNotification(SqueezeCommand command) {
+            if (players.containsKey(command.getPlayerId())) {
+                getPlayer(command.getPlayerId()).handleNotification(command);
+                return true;
+            } else
+                return false;
+        }
 
-	public MusicBrowser getMusicBrowser() {
-		return mMusicBrowser;
-	}
+        private final boolean executeResponseHolders(SqueezeCommand command) {
+            // Request response?
+            boolean response = false;
+            for (String p : command.getParameters()) {
+                if (p.startsWith(REQUEST_TAG)) {
+                    handleResponse(command, p);
+                }
+            }
+            return response;
+        }
 
-	public void addEventListener(SqueezeEventListener listener) {
-		mEventListeners.add(listener);
-	}
+        @SuppressWarnings("unchecked")
+        private final boolean executePrefixCallbacks(String commandString,
+                                                     SqueezeCommand response) {
 
-	public void removeEventListener(SqueezeEventListener listener) {
-		mEventListeners.remove(listener);
-	}
+            ArrayList<FutureResponse.ResponseCallback<SqueezeCommand>> callbacks = new ArrayList<ResponseCallback<SqueezeCommand>>();
+            synchronized (mPrefixCallbacks) {
+                for (Iterator<ResponseCallback<SqueezeCommand>> iter = mPrefixCallbacks
+                        .iterator(); iter.hasNext(); ) {
+                    ResponseCallback<SqueezeCommand> cb = iter.next();
+                    if (commandString.startsWith(cb.getCommandPrefix())) {
+                        callbacks.add(cb);
+                        iter.remove();
+                    }
+                }
+            }
+            for (ResponseCallback callback : callbacks) {
+                callback.handleResponse(response);
+            }
+            return callbacks.size() > 0;
+        }
+    }
+
+    public MusicBrowser getMusicBrowser() {
+        return mMusicBrowser;
+    }
+
+    public void addEventListener(SqueezeEventListener listener) {
+        mEventListeners.add(listener);
+    }
+
+    public void removeEventListener(SqueezeEventListener listener) {
+        mEventListeners.remove(listener);
+    }
 }

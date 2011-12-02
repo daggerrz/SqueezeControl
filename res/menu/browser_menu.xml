@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ This program is free software; you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License version 3 as
+  ~ published by the Free Software Foundation.
+  -->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/browser_add_to_playlist"
-        android:orderInCategory="1"
-        android:title="Add to playlist"/>
+          android:orderInCategory="1"
+          android:title="Add to playlist"/>
 
     <item android:id="@+id/browser_play"
-        android:orderInCategory="2"
-        android:title="Play now" />
+          android:orderInCategory="2"
+          android:title="Play now"/>
 
 </menu>

@@ -1,8 +1,14 @@
+<!--
+  ~ This program is free software; you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License version 3 as
+  ~ published by the Free Software Foundation.
+  -->
+
 <LinearLayout android:id="@+id/LinearLayout01"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android">
-	<TextView android:text="@+id/TextView01" android:id="@+id/TextView01"
-		android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-	<ListView android:id="@+id/ListView01" android:layout_width="wrap_content"
-		android:layout_height="wrap_content"></ListView>
+              android:layout_width="fill_parent" android:layout_height="fill_parent"
+              xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:text="@+id/TextView01" android:id="@+id/TextView01"
+              android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+    <ListView android:id="@+id/ListView01" android:layout_width="wrap_content"
+              android:layout_height="wrap_content"></ListView>
 </LinearLayout>
