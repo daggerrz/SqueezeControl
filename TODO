@@ -1,0 +1,67 @@
+TODO
+
+*) Song list for an album needs an item on top that allows user to play
+the entire album.
+
+*) Need "all songs" item on Albums for artist list.
+
+*) Put a "get info" circle-I icon on the right side of the song item listing.
+Brings up a dialog showing duration, genre(s), album, bitrate?, etc.
+
+*) Put an "remove item" X icon on the right side of the current playlist items.
+
+*) Drag and drop reordering of current playlist.
+
+*) Allow user to reorder BrowseModeActivity entries.
+
+*) Main menu should be accessible from BrowseModeActivity, and maybe everywhere.
+
+*) Better access to keyboard for search -- it's annoying to get to on tablets
+w/o search button, and ICS has no search button.
+
+*) Now playing screen needs a total revamp:
+ - Bigger album art (especially for tablets), maybe use it as a background. 
+ - "m of n tracks"
+ - Progress bar
+ - Scrubbable progress bar
+ - Volume slider above or below buttons
+ - Shuffle playlist and repeat one/all buttons (in a submenu or something?)
+
+*) Improve the "now playing" toolbar.  Play/pause toggle, progress bar, etc.
+
+*) Lists should remember their position when you use the back button.
+
+*) Fix bug where "now playing" doesn't track current song.
+
+*) Rework UI for ICS.  Fragments, ActionBar, etc.
+
+*) Display more info on list items in landscape layout or on tablets.
+  - Number of tracks for albums (would require a server query for each album...)
+  - Duration for songs
+  
+*) About screen showing contact info, developers, license, link to github page,
+link to changelog, etc.
+
+*) Don't descend into album view from context menu for an album we're already in.
+
+
+CODE CHANGES
+
+*) Add some sort of automated testing.  A little python socket server with a
+simple dict of request => response...
+
+*) Change the rest of MusicBrowser.get*() methods to use splitToParameterMap().
+
+*) Parse count from the raw data in SqueezeCommand and make it available,
+instead of forcing the consumer to dig and find it at the end.
+
+*) onServiceBound method in CurrentPlaylistBrowserActivity looks to be doing
+roughly what AbstractMusicBrowser.onServiceBound does, but differently.
+Also look at onDestroy().
+
+*) Clean up unused methods and variables.
+
+*) Add more debug logging and a global static debug flag.
+
+*) Decide if models are going to use bean-style accessors or not, and make
+them consistent.

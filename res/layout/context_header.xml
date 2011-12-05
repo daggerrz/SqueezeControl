@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ This program is free software; you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License version 3 as
+  ~ published by the Free Software Foundation.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:padding="6dip"
+        >
+
+    <TextView
+        android:id="@+id/first_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:layout_alignParentTop="true"
+        android:layout_weight="1"
+        android:layout_alignParentRight="false"
+        android:text="First line of context menu header"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#fff"
+    />
+
+</RelativeLayout>

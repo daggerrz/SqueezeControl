@@ -67,4 +67,20 @@ public class Song implements Browsable {
     public String toString() {
         return title;
     }
+
+	public String getArtistId() {
+		return artistId;
+	}
+
+	public String getAlbumId() {
+		return albumId;
+	}
+
+	public void setRemote(String remval) {
+		if (null == remval) {
+			remote = false;
+		} else {
+			remote = remval.equals("1");
+		}
+	}
 }

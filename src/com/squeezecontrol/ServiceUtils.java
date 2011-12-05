@@ -13,6 +13,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
 public class ServiceUtils {
@@ -37,11 +39,39 @@ public class ServiceUtils {
 
     }
 
-    public static void requireWifiOrFinish(final Activity context) {
-        WifiManager wifiManager = (WifiManager) context
-                .getSystemService(Context.WIFI_SERVICE);
-        if (!wifiManager.isWifiEnabled()) {
-
+    /**
+     * Are we connected to either WiFi or Ethernet?
+     * 
+     * TODO Figure out what TYPE_DUMMY is.
+     * TODO Look for a better test for "are we on the emulator".  Maybe it
+     * should be "is this a dev build"?
+     * XXX??? Testing for emulator makes it hard to verify that the wifi
+     * test is working.
+     * 
+     * @return true if the network is valid, or if we appear to be running
+     * on the emulator.
+     */
+    public static boolean validNetworkAvailable(Context context) {
+    	if ("sdk".equals(android.os.Build.PRODUCT)) {
+    		// Running on the emulator
+    		return true;
+    	}
+    	ConnectivityManager cmgr = 
+    		(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cmgr.getActiveNetworkInfo();
+        return null != activeNetwork &&
+        	(activeNetwork.getType() == ConnectivityManager.TYPE_WIFI ||
+             activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET);
+    }
+    
+    /**
+     * If we're not connected to a valid network, complain and allow the user
+     * to turn on WiFi.
+     *
+     * FIXME This should really allow the user to connect ethernet as well...
+     */
+    public static void requireValidNetworkOrFinish(final Activity context) {
+        if (! validNetworkAvailable(context)) {
             AlertDialog.Builder dialog = new AlertDialog.Builder(context);
             dialog.setMessage(R.string.wlan_required);
             dialog.setTitle("WLAN required");
@@ -61,6 +91,5 @@ public class ServiceUtils {
             });
             dialog.create().show();
         }
-
     }
 }
