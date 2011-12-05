@@ -101,42 +101,25 @@ public class MusicBrowser {
             command.addTag("artist_id", artistId);
 
             // a:artistname, l:album name, r:bitrate, d:duration, o:type,
-            // x:remote
-            command.addTag("tags", "alrdox");
+            // x:remote, s:artist_id, e:album_id
+            command.addTag("tags", "aldoxse");
             SqueezeCommand res = mBroker.sendRequest(command.toString());
-            Song song = null;
-            for (String p : res.getParameters()) {
-                if (p.startsWith("title%3A")) {
-                    String title = SqueezeCommand.decode(p.substring("title%3A"
-                            .length()));
-                    song.title = title;
-                } else if (p.startsWith("album%3A")) {
-                    String album = SqueezeCommand.decode(p.substring("title%3A"
-                            .length()));
-                    song.album = album;
-                } else if (p.startsWith("artist%3A")) {
-                    String artist = SqueezeCommand.decode(p
-                            .substring("artist%3A".length()));
-                    song.artist = artist;
-                } else if (p.startsWith("id%3A")) {
-                    song = Song.forName(null);
-                    song.setId(p.substring("id%3A".length()));
-                    songs.add(song);
-                } else if (p.startsWith("bitrate%3A")) {
-                    song.bitrate = SqueezeCommand.decode(p
-                            .substring("bitrate%3A".length()));
-                } else if (p.startsWith("duration%3A")) {
-                    String durationString = SqueezeCommand.decode(p
-                            .substring("duration%3A".length()));
-                    // Duration in seconds with decimals. Skip decimals
-                    song.duration = SqueezeCommand.parseTime(durationString);
-                } else if (p.startsWith("remote%3a1")) { // 1 -> Remote = true
-                    song.remote = true;
-                } else if (p.startsWith("type%3A")) {
-                    song.type = p.substring("type%3A".length());
-                } else if (p.startsWith("count%3A")) {
-                    count = Integer.parseInt(p.substring("count%3A".length()));
-                }
+            for (ArrayList<String> songRow : res.splitParameters("id")) {
+                Map<String, String> songMap = SqueezeCommand
+                        .splitToParameterMap(songRow);
+                Song song = new Song();
+                songs.add(song);
+                song.id = songMap.get("id");
+                song.title = songMap.get("title");
+                song.album = songMap.get("album");
+                song.albumId = songMap.get("album_id");
+                song.artist = songMap.get("artist");
+                song.artistId = songMap.get("artist_id");
+                song.duration = SqueezeCommand.parseTime(songMap.get("duration"));
+                song.setRemote(songMap.get("remote"));
+                song.type = songMap.get("type");
+                if (songMap.containsKey("count"))
+                    count = Integer.parseInt(songMap.get("count"));
             }
         } catch (IOException e) {
         }
@@ -324,4 +307,33 @@ public class MusicBrowser {
         mBroker.sendRequest(bld.toString());
     }
 
+	/**
+	 * Find the ID for an artist given the name.
+	 * 
+	 * Searches for artists having the given name as a substring, and looks
+	 * at the first hundred for an exact match.
+	 * 
+	 * @param artistName Name of the artist to find ID for.
+	 * @return The ID of the artist, or the empty string.
+	 */
+	public String getArtistIdFromArtistName(String artistName) {
+		String artistId = "";
+        try {
+            SqueezeTaggedRequestBuilder command = new SqueezeTaggedRequestBuilder(
+                    "artists 0 100");
+            command.addTag("search", Uri.encode(artistName));
+            SqueezeCommand res = mBroker.sendRequest(command.toString());
+            for (ArrayList<String> row : res.splitParameters("id")) {
+                Map<String, String> rowMap = SqueezeCommand
+                        .splitToParameterMap(row);
+                String name = rowMap.get("artist");
+                if (name.equals(artistName)) {
+                	artistId = rowMap.get("id");
+                	break;
+                }
+            }
+        } catch (IOException e) {
+        }
+        return artistId;
+	}
 }

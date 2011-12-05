@@ -102,7 +102,7 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
                     updatePlayerControlsView();
                 }
             };
-            ServiceUtils.requireWifiOrFinish(this);
+            ServiceUtils.requireValidNetworkOrFinish(this);
         }
     }
 
@@ -214,10 +214,12 @@ public class PlayerActivity extends Activity implements View.OnTouchListener,
 
         View v = (View) mSongDescription.getParent();
         v.setOnTouchListener(this);
+        // FIXME We're not doing anything with this long click...
         v.setOnLongClickListener(this);
 
         v = (View) mArtistName.getParent();
         v.setOnTouchListener(this);
+        // TODO Consider having a click do the same thing.  Might break drag scrolling...
         v.setOnLongClickListener(this);
 
         v = (View) mAlbumName.getParent();

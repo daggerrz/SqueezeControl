@@ -8,6 +8,7 @@ package com.squeezecontrol;
 
 import android.os.Bundle;
 import android.text.util.Linkify;
+import android.view.ContextMenu;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -72,6 +73,14 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
     }
 
     @Override
+    protected void addContextMenuItems(ContextMenu menu) {
+    	Song selectedItem = (Song) getSelectedItem();
+		menu.add(0, ARTIST_CTX_MENU_ITEM, 1, "Artist: " + selectedItem.artist);
+		menu.add(0, ALBUM_CTX_MENU_ITEM, 1, "Album: " + selectedItem.album);
+		menu.add(0, DOWNLOAD_CTX_MENU_ITEM, 1, "Download to device");
+    }
+
+    @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         if (position < 0)
             return;
@@ -90,10 +99,6 @@ public class SongBrowserActivity extends AbstractMusicBrowserActivity<Song> {
     @Override
     protected void download(Song selectedItem) {
         getDownloadService().queueSongForDownload(selectedItem);
-    }
-
-    protected int getMenuResource() {
-        return R.menu.browse_menu_with_download;
     }
 
     @Override

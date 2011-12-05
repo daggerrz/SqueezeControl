@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -21,11 +22,14 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Filter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.squeezecontrol.download.MusicDownloadService;
 import com.squeezecontrol.io.MusicBrowser;
 import com.squeezecontrol.io.SqueezePlayer;
 import com.squeezecontrol.model.Browsable;
+import com.squeezecontrol.model.Album;
+import com.squeezecontrol.model.Song;
 import com.squeezecontrol.util.VolumeKeyHandler;
 import com.squeezecontrol.view.BrowseableAdapter;
 import com.squeezecontrol.view.NowPlayingView;
@@ -46,8 +50,16 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
     private static int MAX_PENDING_LOAD_REQUESTS = 2;
     private static int PAGE_SIZE = 15;
 
-    private static final String LOG_TAG = "AbstractMusicBrowser";
+	private static final int ADD_TO_PLAYLIST_CTX_MENU_ITEM = 100;
+	
+	private static final int PLAY_CTX_MENU_ITEM = 200;
 
+	protected static final int DOWNLOAD_CTX_MENU_ITEM = 300;
+	
+	protected static final int ARTIST_CTX_MENU_ITEM = 400;
+	
+	protected static final int ALBUM_CTX_MENU_ITEM = 500;
+	
     private Handler guiHandler = new Handler();
 
     private SqueezeService mService;
@@ -98,7 +110,9 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
     @Override
     protected void onPause() {
         super.onPause();
-        mNowPlayingView.stopListening();
+        if (null != mNowPlayingView) {
+        	mNowPlayingView.stopListening();
+        }
     }
 
     protected abstract BrowseableAdapter<T> createListAdapter();
@@ -194,22 +208,67 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenuInfo menuInfo) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(getMenuResource(), menu);
+    	super.onCreateContextMenu(menu, v, menuInfo);
+		// Figure out what list item we're getting context for
+		AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfo;
+		mCurrentPosition = mi.position;
 
-        AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfo;
-        mCurrentPosition = mi.position;
+		// Build the header
+    	LayoutInflater mInflater = getLayoutInflater();
+    	View hview = mInflater.inflate(R.layout.context_header, null);
+    	TextView firstLine = (TextView) hview.findViewById(R.id.first_line);
+    	firstLine.setText(getSelectedItem().getName());
+    	menu.setHeaderView(hview);
+		
+    	/* XXX??? Maybe I should inflate a resource and then call
+    	 * addContextMenuItems(menu)?  Not sure if that works... */
+    	menu.add(0, PLAY_CTX_MENU_ITEM, 0, "Play now");
+		menu.add(0, ADD_TO_PLAYLIST_CTX_MENU_ITEM, 1, "Add to playlist");
+		// Allow subclass to add menu items (artist, album, download)
+		addContextMenuItems(menu);
     }
 
-    @Override
+    /**
+     * Add context menu items appropriate to the subclass' activity, such
+     * as "Download to device" or "Browse albums by this artist"
+     * 
+     * @param menu The menu to add items to.
+     */
+    protected void addContextMenuItems(ContextMenu menu) {
+    	// Nothing to see here in most subclasses.
+    }
+
+	@Override
     public boolean onContextItemSelected(MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.browser_add_to_playlist) {
+        if (itemId == ADD_TO_PLAYLIST_CTX_MENU_ITEM) {
             addToPlaylist(getSelectedItem());
-        } else if (itemId == R.id.browser_play) {
+        } else if (itemId == PLAY_CTX_MENU_ITEM) {
             play(getSelectedItem(), mCurrentPosition);
-        } else {
-            downloadIfSdCardIsPresent(getSelectedItem());
+        } else if (itemId == DOWNLOAD_CTX_MENU_ITEM) {
+        	downloadIfSdCardIsPresent(getSelectedItem());
+        } else if (itemId == ARTIST_CTX_MENU_ITEM) {
+        	// Browse albums by the artist of the selected list item
+        	Intent intent = new Intent(this, AlbumBrowserActivity.class);
+        	Object selectedItem = getSelectedItem();
+        	String artistId;
+        	if (selectedItem instanceof Song) {
+        		artistId = ((Song) selectedItem).getArtistId();
+        	} else {
+        		/* The Squeeze CLI won't return artist_id for an album, so we
+        		 * have to go to some trouble to get it from the artist's name. */
+        		artistId = getMusicBrowser().getArtistIdFromArtistName(
+        						((Album) selectedItem).artistName);
+        	}
+        	intent.putExtra(AlbumBrowserActivity.EXTRA_ARTIST_ID, artistId);
+            startActivity(intent);
+        } else if (itemId == ALBUM_CTX_MENU_ITEM) {
+        	// Browse the album the selected list item (a Song) is from
+	        Intent intent = new Intent(this, SongBrowserActivity.class);
+	        Song selectedItem = (Song) getSelectedItem();
+	        intent.putExtra(SongBrowserActivity.EXTRA_ALBUM_ID,
+	        		selectedItem.getAlbumId());
+        	startActivity(intent);
         }
         return true;
     }
@@ -415,10 +474,6 @@ public abstract class AbstractMusicBrowserActivity<T extends Browsable> extends
     @Override
     public Object onRetainNonConfigurationInstance() {
         return getListAdapter();
-    }
-
-    protected int getMenuResource() {
-        return R.menu.browser_menu;
     }
 
     @Override
