@@ -37,7 +37,6 @@ public class SqueezeService implements SqueezeEventListener {
     private SqueezePlayer mPlayer;
     private boolean started = false;
 
-    private ConnectivityManager mConnectivityManager;
     private BroadcastReceiver mConnectivityStateReceiver;
 
     private HttpFetchingImageStore mCoverImageStore;
@@ -135,12 +134,10 @@ public class SqueezeService implements SqueezeEventListener {
         mGenericImageStore = new HttpFetchingImageStore(null, null, null);
         mGenericImageService = new ImageLoaderService(mGenericImageStore);
 
-
-        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mConnectivityStateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                startIfWifiAccess();
+                startIfValidNetwork();
             }
         };
     }
@@ -156,7 +153,7 @@ public class SqueezeService implements SqueezeEventListener {
     }
 
     public void start() {
-        startIfWifiAccess();
+        startIfValidNetwork();
     }
 
     public void stop() {
@@ -165,13 +162,11 @@ public class SqueezeService implements SqueezeEventListener {
             mDownloadService.stop();
     }
 
-    private void startIfWifiAccess() {
+    private void startIfValidNetwork() {
         if (!Settings.isConfigured(mContext))
             return;
 
-        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
-        if (activeNetwork != null
-                && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+        if (ServiceUtils.validNetworkAvailable(mContext)) {
             synchronized (this) {
                 if (!started) {
                     started = true;

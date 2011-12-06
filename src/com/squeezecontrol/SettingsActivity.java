@@ -51,7 +51,7 @@ public class SettingsActivity extends PreferenceActivity implements
                 "test_http");
         mTestHttp.setOnPreferenceClickListener(this);
 
-        ServiceUtils.requireWifiOrFinish(this);
+        ServiceUtils.requireValidNetworkOrFinish(this);
         mHandler = new Handler();
     }
 

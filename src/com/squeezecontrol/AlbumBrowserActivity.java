@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.util.Linkify;
+import android.view.ContextMenu;
 import android.view.View;
 import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
@@ -120,10 +121,11 @@ public class AlbumBrowserActivity extends AbstractMusicBrowserActivity<Album>
         };
     }
 
-
     @Override
-    protected int getMenuResource() {
-        return R.menu.browse_menu_with_download;
+    protected void addContextMenuItems(ContextMenu menu) {
+    	Album selectedItem = (Album) getSelectedItem();
+		menu.add(0, ARTIST_CTX_MENU_ITEM, 1, "Artist: " + selectedItem.artistName);
+		menu.add(0, DOWNLOAD_CTX_MENU_ITEM, 1, "Download to device");
     }
 
     @Override

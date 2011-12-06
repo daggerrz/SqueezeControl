@@ -1,0 +1,58 @@
+2011-12-04  Dirk Bergstrom  <dirk@otisbean.com>
+
+Browse album & artist from context menu.  Reorder main list activities.  Better
+network detection, especially on the emulator.
+
+	* src/com/squeezecontrol/AbstractMusicBrowserActivity.java (onCreateContextMenu):
+	Create context menu dynamically instead of from XML.  Allows us to
+	add browse by artist/album items when appropriate, and set a
+	descriptive menu header. 
+	(addContextMenuItems): Stub method, overridden in some subclasses.
+	(onContextItemSelected): Fire off activies for artist/album browsing
+	if appropriate.
+	(getMenuResource): Removed, no longer needed.
+
+	* src/com/squeezecontrol/AlbumBrowserActivity.java (addContextMenuItems): 
+	Add browse by artist and download menu items.
+	 
+	* src/com/squeezecontrol/BrowseModeActivity.java (onCreate, onListItemClick):
+	Change order of activities to something a bit more sensible.
+ 
+	* src/com/squeezecontrol/SongBrowserActivity.java (addContextMenuItems):
+	Add browse by artist/album and download menu items. 
+	(getMenuResource): Remove no-longer-relevant method.
+	
+	* src/com/squeezecontrol/io/MusicBrowser.java (getSongs): Retrieve
+	and set albumId and artistId.  Don't bother with bitrate.  Use
+	classier splitToParameterMap() style param access.
+	(getArtistIdFromArtistName): Utility method for finding the artistId
+	for an album.
+	
+	* src/com/squeezecontrol/ServiceUtils.java (validNetworkAvailable): Check
+	to see that we have a fast network connection (wifi or ethernet), or
+	are running on the emulator.  Improved version of "is wifi on" that
+	doesn't suck for developers using the emulator.
+	(requireValidNetworkOrFinish): Rename from "Wifi" to "ValidNetwork",
+	use validNetworkAvailable().
+	
+	* src/com/squeezecontrol/SettingsActivity.java (onCreate): Adjust to
+	new requireValidNetworkOrFinish() method name.
+
+	* src/com/squeezecontrol/SqueezeService.java (startIfValidNetwork):
+	Rename method and use validNetworkAvailable().  
+	
+	* src/com/squeezecontrol/PlayerActivity.java (onCreate): Adjust to
+	new name for requireValidNetworkOrFinish.
+	
+	* res/layout/context_header.xml: Trivial layout for context menu
+	header.
+	
+	* res/menu/browse*_menu.xml: Remove no longer needed menu layouts. 
+
+	* src/com/squeezecontrol/model/Song.java (getAlbumId, getArtistId):
+	Add bean-style accessors.
+	(setRemote): Setter that handles nulls.
+
+    * assets/changelog.html: Note changes.
+    
+    * TODO: Slushpile of ideas and features.

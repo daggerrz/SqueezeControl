@@ -30,17 +30,18 @@ public class BrowseModeActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+        // TODO Make the ordering user configurable
         ArrayList<Action> modes = new ArrayList<Action>();
+        modes.add(new Action("New music", R.drawable.newmusic));
         modes.add(new Action("Artists", R.drawable.artists));
         modes.add(new Action("Albums", R.drawable.albums));
         modes.add(new Action("Songs", R.drawable.songs));
-        modes.add(new Action("Music folder", R.drawable.musicfolder));
-        modes.add(new Action("Internet radio", R.drawable.radio));
-        modes.add(new Action("Apps", R.drawable.plugin));
         modes.add(new Action("Genres", R.drawable.genres));
-        modes.add(new Action("New music", R.drawable.newmusic));
-        modes.add(new Action("Playlists", R.drawable.playlists));
+        modes.add(new Action("Internet radio", R.drawable.radio));
         modes.add(new Action("Favorites", R.drawable.favorites));
+        modes.add(new Action("Playlists", R.drawable.playlists));
+        modes.add(new Action("Apps", R.drawable.plugin));
+        modes.add(new Action("Music folder", R.drawable.musicfolder));
 
         setListAdapter(new ArrayAdapter<Action>(this,
                 R.layout.list_item_with_icon, modes) {
@@ -72,37 +73,40 @@ public class BrowseModeActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Intent intent = null;
         switch (position) {
-            case 0:
+            case 1:
                 intent = new Intent(this, ArtistBrowserActivity.class);
                 break;
-            case 1:
+            case 2:
                 intent = new Intent(this, AlbumBrowserActivity.class);
                 break;
-            case 2:
+            case 3:
                 intent = new Intent(this, SongBrowserActivity.class);
                 break;
-            case 3:
+            case 9:
                 intent = new Intent(this, MusicFolderBrowserActivity.class);
-                break;
-            case 4:
-                intent = new Intent(this, AppsAndRadioRootsBrowserActivity.class);
-                intent.putExtra(AppsAndRadioRootsBrowserActivity.EXTRA_BROWSER_TYPE, AppsAndRadioRootsBrowserActivity.RADIOS);
                 break;
             case 5:
                 intent = new Intent(this, AppsAndRadioRootsBrowserActivity.class);
-                intent.putExtra(AppsAndRadioRootsBrowserActivity.EXTRA_BROWSER_TYPE, AppsAndRadioRootsBrowserActivity.APPS);
-                break;
-            case 6:
-                intent = new Intent(this, GenreBrowserActivity.class);
-                break;
-            case 7:
-                intent = new Intent(this, AlbumBrowserActivity.class);
-                intent.putExtra(AlbumBrowserActivity.EXTRA_SORT_MODE, AlbumBrowserActivity.SORT_MODE_NEW_MUSIC);
+                intent.putExtra(AppsAndRadioRootsBrowserActivity.EXTRA_BROWSER_TYPE,
+                		AppsAndRadioRootsBrowserActivity.RADIOS);
                 break;
             case 8:
+                intent = new Intent(this, AppsAndRadioRootsBrowserActivity.class);
+                intent.putExtra(AppsAndRadioRootsBrowserActivity.EXTRA_BROWSER_TYPE,
+                		AppsAndRadioRootsBrowserActivity.APPS);
+                break;
+            case 4:
+                intent = new Intent(this, GenreBrowserActivity.class);
+                break;
+            case 0:
+                intent = new Intent(this, AlbumBrowserActivity.class);
+                intent.putExtra(AlbumBrowserActivity.EXTRA_SORT_MODE,
+                		AlbumBrowserActivity.SORT_MODE_NEW_MUSIC);
+                break;
+            case 7:
                 intent = new Intent(this, PlaylistBrowserActivity.class);
                 break;
-            case 9:
+            case 6:
                 intent = new Intent(this, XmlBrowserActivity.class);
                 intent.putExtra(XmlBrowserActivity.EXTRA_BROWSER_COMMAND_COMMAND, "favorites");
                 intent.putExtra(XmlBrowserActivity.EXTRA_BROWSER_TITLE, "Favorites");
