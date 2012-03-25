@@ -18,6 +18,20 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
 public class ServiceUtils {
+    private static int TYPE_ETHERNET;
+    private static boolean ethernetSupported;
+
+    static {
+        try {
+            // ethernet connections available from API version 13
+            TYPE_ETHERNET = ConnectivityManager.class.getField("TYPE_ETHERNET").getInt(null);
+            ethernetSupported = true;
+        } catch (IllegalAccessException e) {
+            ethernetSupported = false;
+        } catch (NoSuchFieldException e) {
+            ethernetSupported = false;
+        }
+    }
 
 
     public static boolean bindToService(Context context,
@@ -61,7 +75,7 @@ public class ServiceUtils {
         NetworkInfo activeNetwork = cmgr.getActiveNetworkInfo();
         return null != activeNetwork &&
         	(activeNetwork.getType() == ConnectivityManager.TYPE_WIFI ||
-             activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET);
+             (ethernetSupported && activeNetwork.getType() == TYPE_ETHERNET));
     }
     
     /**
